@@ -59,7 +59,7 @@ jobs:
 
           GROUP_ID="com.mapconductor"
           GROUP_PATH="${GROUP_ID//./\/}"
-          ARTIFACT_ID="for-mapbox"
+          ARTIFACT_ID="geojson-layer"
 
           local_version=$(grep '^libraryVersion=' gradle.properties | cut -d'=' -f2 | tr -d '\r')
           if [[ -z "$local_version" ]]; then
