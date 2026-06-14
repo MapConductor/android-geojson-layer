@@ -47,33 +47,70 @@ scope:
 
 ```kotlin
 @Composable
-fun GeoJsonMap() {
-    val context = LocalContext.current
+fun BasicGeoJsonExample(modifier: Modifier) {
     val mapViewState = rememberMapLibreMapViewState(
         cameraPosition = MapCameraPosition(
-            position = GeoPoint(35.68, 139.77),
+            position = GeoPoint.fromLongLat(55.3089185, 25.255377),
             zoom = 13.0,
         ),
     )
 
-    var features by remember { mutableStateOf<List<GeoJSONFeature>>(emptyList()) }
+    val layerState =
+        remember {
+            GeoJSONLayerState(
+                fillColor = android.graphics.Color.argb(127, 0x3b, 0xb2, 0xd0),
+                strokeColor = android.graphics.Color.argb(255, 0x1d, 0x70, 0x82),
+                strokeWidth = 2f,
+            )
+        }
 
     LaunchedEffect(Unit) {
-        features = withContext(Dispatchers.IO) {
-            context.assets.open("areas.geojson").use { input ->
-                GeoJSONParser.parseStream(input)
+        features =
+            withContext(Dispatchers.IO) {
+                BASIC_GEOJSON.byteInputStream(Charsets.UTF_8).use(GeoJSONParser::parseStream)
             }
-        }
     }
 
     MapLibreMapView(state = mapViewState) {
-        GeoJSONLayer(features = features)
+        GeoJSONLayer(state = layerState, features = features)
     }
 }
+
+private val BASIC_GEOJSON =
+    """
+    {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [55.30122473231012, 25.26476622289597],
+                ...,
+                [55.30122473231012, 25.26476622289597]
+              ],
+              [
+                [55.30084858315658, 25.256531695820797],
+                ...,
+                [55.30084858315658, 25.256531695820797]
+              ],
+              [
+                [55.30173763969924, 25.262517391695198],
+                ...,
+                [55.30173763969924, 25.262517391695198]
+              ]
+            ]
+          },
+          "properties": {}
+        }
+      ]
+    }
+    """.trimIndent()
 ```
 
-`parseStream` expects a top-level GeoJSON `FeatureCollection`. For a small JSON string
-or a single feature, use `GeoJSONParser.parse`.
+![](./docs/images/basic-geojson-example.png)
 
 ## Styling
 
@@ -133,6 +170,8 @@ MapLibreMapView(
     )
 }
 ```
+
+![](./docs/images/touch-detection.png)
 
 `processClick` returns `true` when a feature is hit and the layer `onClick` callback is
 invoked. It returns `false` when no rendered feature is found at that map position.
