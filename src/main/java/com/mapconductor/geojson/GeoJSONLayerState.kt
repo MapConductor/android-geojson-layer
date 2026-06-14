@@ -1,10 +1,10 @@
 package com.mapconductor.geojson
 
-import android.graphics.Color
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.mapconductor.core.features.GeoPoint
+import android.graphics.Color
 
 class GeoJSONLayerState(
     opacity: Float = GeoJSONDefaults.DEFAULT_OPACITY,

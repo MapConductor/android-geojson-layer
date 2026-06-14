@@ -8,7 +8,11 @@ import java.util.zip.Deflater
 object FastPngEncoder {
     private val signature = byteArrayOf(-119, 80, 78, 71, 13, 10, 26, 10)
 
-    fun encode(width: Int, height: Int, rgba: ByteArray): ByteArray {
+    fun encode(
+        width: Int,
+        height: Int,
+        rgba: ByteArray,
+    ): ByteArray {
         require(width > 0) { "width must be positive" }
         require(height > 0) { "height must be positive" }
         require(rgba.size == width * height * 4) { "rgba must contain width * height * 4 bytes" }
@@ -46,8 +50,12 @@ object FastPngEncoder {
         return out.toByteArray()
     }
 
-    private fun ihdr(width: Int, height: Int): ByteArray =
-        ByteBuffer.allocate(13)
+    private fun ihdr(
+        width: Int,
+        height: Int,
+    ): ByteArray =
+        ByteBuffer
+            .allocate(13)
             .putInt(width)
             .putInt(height)
             .put(8)
@@ -57,7 +65,11 @@ object FastPngEncoder {
             .put(0)
             .array()
 
-    private fun writeChunk(out: ByteArrayOutputStream, type: String, data: ByteArray) {
+    private fun writeChunk(
+        out: ByteArrayOutputStream,
+        type: String,
+        data: ByteArray,
+    ) {
         val typeBytes = type.encodeToByteArray()
         out.writeInt(data.size)
         out.write(typeBytes)

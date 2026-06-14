@@ -10,12 +10,13 @@ import java.util.zip.Inflater
 class FastPngEncoderTest {
     @Test
     fun encodeWritesValidRgbaPng() {
-        val rgba = byteArrayOf(
-            255.toByte(), 0, 0, 255.toByte(),
-            0, 255.toByte(), 0, 255.toByte(),
-            0, 0, 255.toByte(), 255.toByte(),
-            255.toByte(), 255.toByte(), 255.toByte(), 0,
-        )
+        val rgba =
+            byteArrayOf(
+                255.toByte(), 0, 0, 255.toByte(),
+                0, 255.toByte(), 0, 255.toByte(),
+                0, 0, 255.toByte(), 255.toByte(),
+                255.toByte(), 255.toByte(), 255.toByte(), 0,
+            )
 
         val png = FastPngEncoder.encode(2, 2, rgba)
 
@@ -65,7 +66,10 @@ class FastPngEncoderTest {
         return chunks
     }
 
-    private fun inflate(data: ByteArray, expectedSize: Int): ByteArray {
+    private fun inflate(
+        data: ByteArray,
+        expectedSize: Int,
+    ): ByteArray {
         val inflater = Inflater()
         val output = ByteArray(expectedSize)
         try {
@@ -85,5 +89,8 @@ class FastPngEncoderTest {
             ((this[offset + 2].toInt() and 0xff) shl 8) or
             (this[offset + 3].toInt() and 0xff)
 
-    private data class Chunk(val type: String, val data: ByteArray)
+    private data class Chunk(
+        val type: String,
+        val data: ByteArray,
+    )
 }

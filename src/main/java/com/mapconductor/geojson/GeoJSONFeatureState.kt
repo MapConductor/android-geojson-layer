@@ -37,8 +37,7 @@ class GeoJSONFeatureState(
             visible = visible.hashCode(),
         )
 
-    fun asFlow(): Flow<GeoJSONFeatureFingerPrint> =
-        snapshotFlow { fingerPrint() }.distinctUntilChanged()
+    fun asFlow(): Flow<GeoJSONFeatureFingerPrint> = snapshotFlow { fingerPrint() }.distinctUntilChanged()
 
     private fun styleHashCode(): Int {
         var h = strokeColor.hashCode()
@@ -49,7 +48,10 @@ class GeoJSONFeatureState(
     }
 
     companion object {
-        private fun buildDefaultId(geometry: GeoJSONGeometry, properties: Map<String, Any?>): String {
+        private fun buildDefaultId(
+            geometry: GeoJSONGeometry,
+            properties: Map<String, Any?>,
+        ): String {
             var h = geometry.hashCode()
             h = 31 * h + properties.hashCode()
             return h.toString()

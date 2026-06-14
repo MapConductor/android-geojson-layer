@@ -1,10 +1,5 @@
 package com.mapconductor.geojson
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
-import android.util.LruCache
 import com.mapconductor.core.tileserver.TileProviderInterface
 import com.mapconductor.core.tileserver.TileRequest
 import java.nio.ByteBuffer
@@ -14,6 +9,11 @@ import java.util.concurrent.LinkedBlockingQueue
 import kotlin.math.PI
 import kotlin.math.ln
 import kotlin.math.sin
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Path
+import android.util.LruCache
 
 class GeoJSONTileRenderer(
     val tileSize: Int = GeoJSONDefaults.DEFAULT_TILE_SIZE,
@@ -23,8 +23,10 @@ class GeoJSONTileRenderer(
     private val cacheLock = Any()
     private val cache =
         object : LruCache<String, ByteArray>(cacheSizeKb) {
-            override fun sizeOf(key: String, value: ByteArray): Int =
-                (value.size / 1024).coerceAtLeast(1)
+            override fun sizeOf(
+                key: String,
+                value: ByteArray,
+            ): Int = (value.size / 1024).coerceAtLeast(1)
         }
 
     private val emptyTileMarker = ByteArray(1)
@@ -33,6 +35,7 @@ class GeoJSONTileRenderer(
     private val workerCount = maxConcurrentRenders.coerceIn(1, MAX_CONCURRENT_RENDERS)
 
     @Volatile private var cacheEpoch = 0L
+
     @Volatile private var state = TileState(emptyList(), null)
 
     init {
@@ -45,12 +48,18 @@ class GeoJSONTileRenderer(
     }
 
     @JvmName("updateDynamic")
-    fun update(features: List<GeoJSONFeatureState>, layerStyle: LayerStyle) {
+    fun update(
+        features: List<GeoJSONFeatureState>,
+        layerStyle: LayerStyle,
+    ) {
         update(emptyList(), features, layerStyle)
     }
 
     @JvmName("updateStatic")
-    fun update(staticFeatures: List<GeoJSONFeature>, layerStyle: LayerStyle) {
+    fun update(
+        staticFeatures: List<GeoJSONFeature>,
+        layerStyle: LayerStyle,
+    ) {
         update(staticFeatures, emptyList(), layerStyle)
     }
 
@@ -95,12 +104,13 @@ class GeoJSONTileRenderer(
 
     private fun renderLoop() {
         while (true) {
-            val job = try {
-                renderQueue.take()
-            } catch (_: InterruptedException) {
-                Thread.currentThread().interrupt()
-                return
-            }
+            val job =
+                try {
+                    renderQueue.take()
+                } catch (_: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                    return
+                }
             try {
                 synchronized(cacheLock) {
                     cache.get(job.key)?.let {
@@ -123,7 +133,10 @@ class GeoJSONTileRenderer(
         }
     }
 
-    private fun renderTileInternal(request: TileRequest, tileState: TileState): ByteArray? {
+    private fun renderTileInternal(
+        request: TileRequest,
+        tileState: TileState,
+    ): ByteArray? {
         if (tileState.features.isEmpty()) return null
 
         val z = request.z
@@ -137,8 +150,9 @@ class GeoJSONTileRenderer(
         val tileMinY = y.toDouble() / worldTileCount
         val tileMaxY = (y + 1).toDouble() / worldTileCount
 
-        val candidates = tileState.index?.query(tileMinX, tileMinY, tileMaxX, tileMaxY)
-            ?: tileState.features.indices.toList()
+        val candidates =
+            tileState.index?.query(tileMinX, tileMinY, tileMaxX, tileMaxY)
+                ?: tileState.features.indices.toList()
 
         var hasContent = false
         val bitmap = getBitmap()
@@ -185,19 +199,20 @@ class GeoJSONTileRenderer(
         tileMinY: Double,
         tileMaxX: Double,
         tileMaxY: Double,
-    ): Boolean = renderGeometry(
-        canvas,
-        feature,
-        feature.worldGeometry,
-        zoom,
-        worldSize,
-        originX,
-        originY,
-        tileMinX,
-        tileMinY,
-        tileMaxX,
-        tileMaxY,
-    )
+    ): Boolean =
+        renderGeometry(
+            canvas,
+            feature,
+            feature.worldGeometry,
+            zoom,
+            worldSize,
+            originX,
+            originY,
+            tileMinX,
+            tileMinY,
+            tileMaxX,
+            tileMaxY,
+        )
 
     private fun renderGeometry(
         canvas: Canvas,
@@ -211,8 +226,8 @@ class GeoJSONTileRenderer(
         tileMinY: Double,
         tileMaxX: Double,
         tileMaxY: Double,
-    ): Boolean {
-        return when (geometry) {
+    ): Boolean =
+        when (geometry) {
             is WorldGeometry.Point -> {
                 val px = toPixel(geometry.wx, worldSize, originX)
                 val py = toPixel(geometry.wy, worldSize, originY)
@@ -235,18 +250,19 @@ class GeoJSONTileRenderer(
             }
 
             is WorldGeometry.Line -> {
-                val path = buildLinePath(
-                    geometry.rings,
-                    zoom,
-                    worldSize,
-                    originX,
-                    originY,
-                    tileMinX,
-                    tileMinY,
-                    tileMaxX,
-                    tileMaxY,
-                    feature.strokePaint?.strokeWidth ?: feature.fillPaint.strokeWidth,
-                )
+                val path =
+                    buildLinePath(
+                        geometry.rings,
+                        zoom,
+                        worldSize,
+                        originX,
+                        originY,
+                        tileMinX,
+                        tileMinY,
+                        tileMaxX,
+                        tileMaxY,
+                        feature.strokePaint?.strokeWidth ?: feature.fillPaint.strokeWidth,
+                    )
                 if (!path.isEmpty) {
                     canvas.drawPath(path, feature.strokePaint ?: feature.fillPaint)
                     true
@@ -292,7 +308,6 @@ class GeoJSONTileRenderer(
 
             WorldGeometry.Empty -> false
         }
-    }
 
     private fun buildLinePath(
         rings: List<WorldRing>,
@@ -369,8 +384,11 @@ class GeoJSONTileRenderer(
         return 0.5 - ln((1.0 + siny) / (1.0 - siny)) / (4.0 * PI)
     }
 
-    private fun toPixel(world: Double, worldSize: Double, origin: Double): Float =
-        ((world * worldSize) - origin).toFloat()
+    private fun toPixel(
+        world: Double,
+        worldSize: Double,
+        origin: Double,
+    ): Float = ((world * worldSize) - origin).toFloat()
 
     private fun segmentOutside(
         ax: Double,
@@ -387,7 +405,10 @@ class GeoJSONTileRenderer(
             (ay < minY && by < minY) ||
             (ay > maxY && by > maxY)
 
-    private fun buildRenderFeature(feature: GeoJSONFeature, layerStyle: LayerStyle): RenderFeature {
+    private fun buildRenderFeature(
+        feature: GeoJSONFeature,
+        layerStyle: LayerStyle,
+    ): RenderFeature {
         val strokeColor = feature.strokeColor ?: layerStyle.strokeColor
         val fillColor = feature.fillColor ?: layerStyle.fillColor
         val strokeWidth = feature.strokeWidth ?: layerStyle.strokeWidth
@@ -395,17 +416,21 @@ class GeoJSONTileRenderer(
         return buildRenderFeatureFromStyle(feature, feature.geometry, strokeColor, fillColor, strokeWidth, pointRadius)
     }
 
-    private fun buildRenderFeature(state: GeoJSONFeatureState, layerStyle: LayerStyle): RenderFeature {
-        val source = GeoJSONFeature(
-            id = state.id,
-            geometry = state.geometry,
-            properties = state.properties,
-            strokeColor = state.strokeColor,
-            fillColor = state.fillColor,
-            strokeWidth = state.strokeWidth,
-            pointRadius = state.pointRadius,
-            visible = state.visible,
-        )
+    private fun buildRenderFeature(
+        state: GeoJSONFeatureState,
+        layerStyle: LayerStyle,
+    ): RenderFeature {
+        val source =
+            GeoJSONFeature(
+                id = state.id,
+                geometry = state.geometry,
+                properties = state.properties,
+                strokeColor = state.strokeColor,
+                fillColor = state.fillColor,
+                strokeWidth = state.strokeWidth,
+                pointRadius = state.pointRadius,
+                visible = state.visible,
+            )
         val strokeColor = state.strokeColor ?: layerStyle.strokeColor
         val fillColor = state.fillColor ?: layerStyle.fillColor
         val strokeWidth = state.strokeWidth ?: layerStyle.strokeWidth
@@ -421,22 +446,23 @@ class GeoJSONTileRenderer(
         strokeWidth: Float,
         pointRadius: Float,
     ): RenderFeature {
-
-        val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.FILL
-            color = fillColor
-        }
-        val strokePaint = if (android.graphics.Color.alpha(strokeColor) > 0 && strokeWidth > 0f) {
+        val fillPaint =
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                style = Paint.Style.STROKE
-                color = strokeColor
-                this.strokeWidth = strokeWidth
-                strokeJoin = Paint.Join.ROUND
-                strokeCap = Paint.Cap.ROUND
+                style = Paint.Style.FILL
+                color = fillColor
             }
-        } else {
-            null
-        }
+        val strokePaint =
+            if (android.graphics.Color.alpha(strokeColor) > 0 && strokeWidth > 0f) {
+                Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    style = Paint.Style.STROKE
+                    color = strokeColor
+                    this.strokeWidth = strokeWidth
+                    strokeJoin = Paint.Join.ROUND
+                    strokeCap = Paint.Cap.ROUND
+                }
+            } else {
+                null
+            }
 
         val worldGeometry = toWorldGeometry(geometry)
         val bounds = computeBounds(worldGeometry)
@@ -455,44 +481,55 @@ class GeoJSONTileRenderer(
 
     private fun toWorldGeometry(geometry: GeoJSONGeometry): WorldGeometry =
         when (geometry) {
-            is GeoJSONGeometry.Point -> WorldGeometry.Point(
-                wx = lonToWorld(geometry.longitude),
-                wy = latToWorld(geometry.latitude),
-            )
+            is GeoJSONGeometry.Point ->
+                WorldGeometry.Point(
+                    wx = lonToWorld(geometry.longitude),
+                    wy = latToWorld(geometry.latitude),
+                )
 
-            is GeoJSONGeometry.MultiPoint -> WorldGeometry.Points(
-                points = flatPoints(geometry.points),
-            )
+            is GeoJSONGeometry.MultiPoint ->
+                WorldGeometry.Points(
+                    points = flatPoints(geometry.points),
+                )
 
-            is GeoJSONGeometry.LineString -> WorldGeometry.Line(
-                rings = listOf(WorldRing(flatCoordinates(geometry.coordinates))),
-            )
+            is GeoJSONGeometry.LineString ->
+                WorldGeometry.Line(
+                    rings = listOf(WorldRing(flatCoordinates(geometry.coordinates))),
+                )
 
-            is GeoJSONGeometry.MultiLineString -> WorldGeometry.Line(
-                rings = geometry.lines.map { line ->
-                    WorldRing(flatCoordinates(line))
-                },
-            )
+            is GeoJSONGeometry.MultiLineString ->
+                WorldGeometry.Line(
+                    rings =
+                        geometry.lines.map { line ->
+                            WorldRing(flatCoordinates(line))
+                        },
+                )
 
-            is GeoJSONGeometry.Polygon -> WorldGeometry.Polygon(
-                rings = geometry.rings.map { ring ->
-                    WorldRing(flatCoordinates(ring))
-                },
-            )
-
-            is GeoJSONGeometry.MultiPolygon -> WorldGeometry.Collection(
-                parts = geometry.polygons.map { poly ->
-                    WorldGeometry.Polygon(
-                        rings = poly.map { ring ->
+            is GeoJSONGeometry.Polygon ->
+                WorldGeometry.Polygon(
+                    rings =
+                        geometry.rings.map { ring ->
                             WorldRing(flatCoordinates(ring))
                         },
-                    )
-                },
-            )
+                )
 
-            is GeoJSONGeometry.GeometryCollection -> WorldGeometry.Collection(
-                parts = geometry.geometries.map { toWorldGeometry(it) },
-            )
+            is GeoJSONGeometry.MultiPolygon ->
+                WorldGeometry.Collection(
+                    parts =
+                        geometry.polygons.map { poly ->
+                            WorldGeometry.Polygon(
+                                rings =
+                                    poly.map { ring ->
+                                        WorldRing(flatCoordinates(ring))
+                                    },
+                            )
+                        },
+                )
+
+            is GeoJSONGeometry.GeometryCollection ->
+                WorldGeometry.Collection(
+                    parts = geometry.geometries.map { toWorldGeometry(it) },
+                )
 
             GeoJSONGeometry.Empty -> WorldGeometry.Empty
         }
@@ -559,8 +596,10 @@ class GeoJSONTileRenderer(
     }
 
     private fun boundsOfRings(rings: List<WorldRing>): WorldBounds {
-        var minX = Double.MAX_VALUE; var maxX = -Double.MAX_VALUE
-        var minY = Double.MAX_VALUE; var maxY = -Double.MAX_VALUE
+        var minX = Double.MAX_VALUE
+        var maxX = -Double.MAX_VALUE
+        var minY = Double.MAX_VALUE
+        var maxY = -Double.MAX_VALUE
         for (ring in rings) {
             val coords = ring.coords
             var i = 0
@@ -574,8 +613,11 @@ class GeoJSONTileRenderer(
                 i += 2
             }
         }
-        return if (minX <= maxX) WorldBounds(minX, maxX, minY, maxY)
-        else WorldBounds(0.0, 1.0, 0.0, 1.0)
+        return if (minX <= maxX) {
+            WorldBounds(minX, maxX, minY, maxY)
+        } else {
+            WorldBounds(0.0, 1.0, 0.0, 1.0)
+        }
     }
 
     private fun buildIndex(features: List<RenderFeature>): SpatialIndex {
@@ -640,8 +682,10 @@ class GeoJSONTileRenderer(
 
     private fun getBitmap(): Bitmap {
         val existing = threadLocalBitmap.get()
-        if (existing != null && !existing.isRecycled &&
-            existing.width == tileSize && existing.height == tileSize
+        if (existing != null &&
+            !existing.isRecycled &&
+            existing.width == tileSize &&
+            existing.height == tileSize
         ) {
             return existing
         }
@@ -684,27 +728,55 @@ class GeoJSONTileRenderer(
     )
 
     private data class WorldBounds(
-        val minX: Double, val maxX: Double,
-        val minY: Double, val maxY: Double,
+        val minX: Double,
+        val maxX: Double,
+        val minY: Double,
+        val maxY: Double,
     ) {
-        fun intersects(x1: Double, y1: Double, x2: Double, y2: Double): Boolean =
-            minX <= x2 && maxX >= x1 && minY <= y2 && maxY >= y1
+        fun intersects(
+            x1: Double,
+            y1: Double,
+            x2: Double,
+            y2: Double,
+        ): Boolean = minX <= x2 && maxX >= x1 && minY <= y2 && maxY >= y1
     }
 
     private sealed class WorldGeometry {
-        data class Point(val wx: Double, val wy: Double) : WorldGeometry()
-        data class Points(val points: DoubleArray) : WorldGeometry()
-        data class Line(val rings: List<WorldRing>) : WorldGeometry()
-        data class Polygon(val rings: List<WorldRing>) : WorldGeometry()
-        data class Collection(val parts: List<WorldGeometry>) : WorldGeometry()
+        data class Point(
+            val wx: Double,
+            val wy: Double,
+        ) : WorldGeometry()
+
+        data class Points(
+            val points: DoubleArray,
+        ) : WorldGeometry()
+
+        data class Line(
+            val rings: List<WorldRing>,
+        ) : WorldGeometry()
+
+        data class Polygon(
+            val rings: List<WorldRing>,
+        ) : WorldGeometry()
+
+        data class Collection(
+            val parts: List<WorldGeometry>,
+        ) : WorldGeometry()
+
         object Empty : WorldGeometry()
     }
 
-    private class WorldRing(val coords: DoubleArray) {
+    private class WorldRing(
+        val coords: DoubleArray,
+    ) {
         private val simplifiedByZoom =
-            java.util.concurrent.atomic.AtomicReferenceArray<DoubleArray>(MAX_SIMPLIFY_ZOOM + 1)
+            java.util.concurrent.atomic
+                .AtomicReferenceArray<DoubleArray>(MAX_SIMPLIFY_ZOOM + 1)
 
-        fun coordsForZoom(zoom: Int, tileSize: Int): DoubleArray {
+        fun coordsForZoom(
+            zoom: Int,
+            tileSize: Int,
+        ): DoubleArray {
             if (coords.size < 6) return coords
             val cacheIndex = zoom.coerceIn(0, MAX_SIMPLIFY_ZOOM)
             simplifiedByZoom.get(cacheIndex)?.let { return it }
@@ -731,7 +803,12 @@ class GeoJSONTileRenderer(
         private val grid: Array<MutableList<Int>>,
         private val featureCount: Int,
     ) {
-        fun query(x1: Double, y1: Double, x2: Double, y2: Double): List<Int> {
+        fun query(
+            x1: Double,
+            y1: Double,
+            x2: Double,
+            y2: Double,
+        ): List<Int> {
             val cx0 = (x1 * INDEX_GRID_SIZE).toInt().coerceIn(0, INDEX_GRID_SIZE - 1)
             val cx1 = (x2 * INDEX_GRID_SIZE).toInt().coerceIn(0, INDEX_GRID_SIZE - 1)
             val cy0 = (y1 * INDEX_GRID_SIZE).toInt().coerceIn(0, INDEX_GRID_SIZE - 1)
@@ -774,14 +851,18 @@ class GeoJSONTileRenderer(
      * [longitude]/[latitude], or null if nothing is hit.
      * Call this from a map-level onClick handler on the main thread.
      */
-    fun hitTest(longitude: Double, latitude: Double): GeoJSONFeature? {
+    fun hitTest(
+        longitude: Double,
+        latitude: Double,
+    ): GeoJSONFeature? {
         val wx = lonToWorld(longitude)
         val wy = latToWorld(latitude)
         val currentState = state
         val tolerance = HIT_LINE_TOLERANCE
-        val candidates = currentState.index
-            ?.query(wx - tolerance, wy - tolerance, wx + tolerance, wy + tolerance)
-            ?: currentState.features.indices.toList()
+        val candidates =
+            currentState.index
+                ?.query(wx - tolerance, wy - tolerance, wx + tolerance, wy + tolerance)
+                ?: currentState.features.indices.toList()
 
         for (idx in candidates.asReversed()) {
             val feature = currentState.features[idx]
@@ -791,7 +872,11 @@ class GeoJSONTileRenderer(
         return null
     }
 
-    private fun hitTestGeometry(wx: Double, wy: Double, geometry: WorldGeometry): Boolean =
+    private fun hitTestGeometry(
+        wx: Double,
+        wy: Double,
+        geometry: WorldGeometry,
+    ): Boolean =
         when (geometry) {
             is WorldGeometry.Point ->
                 distanceSq(wx, wy, geometry.wx, geometry.wy) <= HIT_POINT_TOLERANCE_SQ
@@ -815,7 +900,11 @@ class GeoJSONTileRenderer(
             WorldGeometry.Empty -> false
         }
 
-    private fun hitTestPoints(wx: Double, wy: Double, coords: DoubleArray): Boolean {
+    private fun hitTestPoints(
+        wx: Double,
+        wy: Double,
+        coords: DoubleArray,
+    ): Boolean {
         var i = 0
         while (i < coords.size) {
             if (distanceSq(wx, wy, coords[i], coords[i + 1]) <= HIT_POINT_TOLERANCE_SQ) return true
@@ -824,7 +913,11 @@ class GeoJSONTileRenderer(
         return false
     }
 
-    private fun hitTestLine(wx: Double, wy: Double, coords: DoubleArray): Boolean {
+    private fun hitTestLine(
+        wx: Double,
+        wy: Double,
+        coords: DoubleArray,
+    ): Boolean {
         var i = 2
         while (i < coords.size) {
             if (
@@ -844,13 +937,19 @@ class GeoJSONTileRenderer(
         return false
     }
 
-    private fun pointInRing(wx: Double, wy: Double, ring: DoubleArray): Boolean {
+    private fun pointInRing(
+        wx: Double,
+        wy: Double,
+        ring: DoubleArray,
+    ): Boolean {
         var inside = false
         var j = ring.size - 2
         var i = 0
         while (i < ring.size) {
-            val xi = ring[i]; val yi = ring[i + 1]
-            val xj = ring[j]; val yj = ring[j + 1]
+            val xi = ring[i]
+            val yi = ring[i + 1]
+            val xj = ring[j]
+            val yj = ring[j + 1]
             if (((yi > wy) != (yj > wy)) && (wx < (xj - xi) * (wy - yi) / (yj - yi) + xi)) {
                 inside = !inside
             }
@@ -861,11 +960,15 @@ class GeoJSONTileRenderer(
     }
 
     private fun segmentDistanceSq(
-        px: Double, py: Double,
-        ax: Double, ay: Double,
-        bx: Double, by: Double,
+        px: Double,
+        py: Double,
+        ax: Double,
+        ay: Double,
+        bx: Double,
+        by: Double,
     ): Double {
-        val dx = bx - ax; val dy = by - ay
+        val dx = bx - ax
+        val dy = by - ay
         if (dx == 0.0 && dy == 0.0) return distanceSq(px, py, ax, ay)
         val t = ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)
         val tc = t.coerceIn(0.0, 1.0)
@@ -888,12 +991,21 @@ class GeoJSONTileRenderer(
         private const val HIT_POINT_TOLERANCE = 0.0004
         private const val HIT_POINT_TOLERANCE_SQ = HIT_POINT_TOLERANCE * HIT_POINT_TOLERANCE
 
-        private fun distanceSq(ax: Double, ay: Double, bx: Double, by: Double): Double {
-            val dx = ax - bx; val dy = ay - by
+        private fun distanceSq(
+            ax: Double,
+            ay: Double,
+            bx: Double,
+            by: Double,
+        ): Double {
+            val dx = ax - bx
+            val dy = ay - by
             return dx * dx + dy * dy
         }
 
-        private fun simplifyRadial(coords: DoubleArray, tolerance: Double): DoubleArray {
+        private fun simplifyRadial(
+            coords: DoubleArray,
+            tolerance: Double,
+        ): DoubleArray {
             if (coords.size <= 4 || tolerance <= 0.0) return coords
             val toleranceSq = tolerance * tolerance
             val output = DoubleArray(coords.size)

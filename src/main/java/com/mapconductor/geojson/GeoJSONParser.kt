@@ -1,13 +1,13 @@
 package com.mapconductor.geojson
 
-import android.util.JsonReader
-import android.util.JsonToken
-import android.util.JsonWriter
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.StringWriter
-import org.json.JSONArray
-import org.json.JSONObject
+import android.util.JsonReader
+import android.util.JsonToken
+import android.util.JsonWriter
 
 object GeoJSONParser {
     /**
@@ -25,13 +25,19 @@ object GeoJSONParser {
      * Streams GeoJSON features one at a time, invoking [onFeature] for each.
      * Peak memory is dominated by a single feature rather than the full file.
      */
-    fun streamParse(inputStream: InputStream, onFeature: (GeoJSONFeature) -> Unit) {
+    fun streamParse(
+        inputStream: InputStream,
+        onFeature: (GeoJSONFeature) -> Unit,
+    ) {
         val reader = JsonReader(InputStreamReader(inputStream, Charsets.UTF_8))
         reader.isLenient = true
         reader.use { parseTopLevelStreaming(it, onFeature) }
     }
 
-    private fun parseTopLevelStreaming(reader: JsonReader, onFeature: (GeoJSONFeature) -> Unit) {
+    private fun parseTopLevelStreaming(
+        reader: JsonReader,
+        onFeature: (GeoJSONFeature) -> Unit,
+    ) {
         reader.beginObject()
         while (reader.hasNext()) {
             when (reader.nextName()) {
@@ -68,7 +74,10 @@ object GeoJSONParser {
         return GeoJSONFeature(id = id, geometry = geometry, properties = properties)
     }
 
-    private fun copyJsonValue(reader: JsonReader, writer: JsonWriter) {
+    private fun copyJsonValue(
+        reader: JsonReader,
+        writer: JsonWriter,
+    ) {
         when (reader.peek()) {
             JsonToken.BEGIN_OBJECT -> {
                 writer.beginObject()
@@ -90,7 +99,10 @@ object GeoJSONParser {
             JsonToken.STRING -> writer.value(reader.nextString())
             JsonToken.NUMBER -> writer.value(reader.nextDouble())
             JsonToken.BOOLEAN -> writer.value(reader.nextBoolean())
-            JsonToken.NULL -> { reader.nextNull(); writer.nullValue() }
+            JsonToken.NULL -> {
+                reader.nextNull()
+                writer.nullValue()
+            }
             else -> reader.skipValue()
         }
     }
@@ -141,10 +153,11 @@ object GeoJSONParser {
         val geometryObj = obj.optJSONObject("geometry") ?: return null
         val geometry = parseGeometryObject(geometryObj) ?: return null
 
-        val id = when {
-            obj.has("id") -> obj.get("id").toString()
-            else -> null
-        }
+        val id =
+            when {
+                obj.has("id") -> obj.get("id").toString()
+                else -> null
+            }
 
         val properties = mutableMapOf<String, Any?>()
         obj.optJSONObject("properties")?.let { props ->
@@ -189,9 +202,9 @@ object GeoJSONParser {
         return GeoJSONGeometry.MultiPoint(points)
     }
 
-    private fun parseLineString(coords: JSONArray): GeoJSONGeometry.LineString {
-        return GeoJSONGeometry.LineString(parseLonLatList(coords))
-    }
+    private fun parseLineString(coords: JSONArray): GeoJSONGeometry.LineString =
+        GeoJSONGeometry
+            .LineString(parseLonLatList(coords))
 
     private fun parseMultiLineString(coords: JSONArray): GeoJSONGeometry.MultiLineString {
         val lines = mutableListOf<List<LonLat>>()

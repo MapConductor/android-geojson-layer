@@ -13,7 +13,6 @@ import java.io.InputStreamReader
  * suitable for streaming very large datasets.
  */
 object GeoJSONSeqParser {
-
     private const val RS = '\u001E'
     private const val CHUNK_SIZE = 8192
 
@@ -25,7 +24,10 @@ object GeoJSONSeqParser {
 
     fun parse(file: File): List<GeoJSONFeature> = parse(file.inputStream())
 
-    fun streamParse(inputStream: InputStream, onFeature: (GeoJSONFeature) -> Unit) {
+    fun streamParse(
+        inputStream: InputStream,
+        onFeature: (GeoJSONFeature) -> Unit,
+    ) {
         val reader = InputStreamReader(inputStream, Charsets.UTF_8).buffered()
         val chunk = CharArray(CHUNK_SIZE)
         val record = StringBuilder()
@@ -44,10 +46,15 @@ object GeoJSONSeqParser {
         }
     }
 
-    fun streamParse(file: File, onFeature: (GeoJSONFeature) -> Unit) =
-        streamParse(file.inputStream(), onFeature)
+    fun streamParse(
+        file: File,
+        onFeature: (GeoJSONFeature) -> Unit,
+    ) = streamParse(file.inputStream(), onFeature)
 
-    private fun flushRecord(record: StringBuilder, onFeature: (GeoJSONFeature) -> Unit) {
+    private fun flushRecord(
+        record: StringBuilder,
+        onFeature: (GeoJSONFeature) -> Unit,
+    ) {
         val text = record.toString().trim()
         record.clear()
         if (text.isEmpty()) return

@@ -29,16 +29,18 @@ fun MapViewScope.GeoJSONLayer(
     disableTileServerCache: Boolean = false,
     content: @Composable () -> Unit = {},
 ) {
-    val featureCollector = remember {
-        ChildCollectorImpl<GeoJSONFeatureState, GeoJSONFeatureFingerPrint>(
-            asFlow = { it.asFlow() },
-            updateDebounce = Settings.Default.composeEventDebounce,
-        )
-    }
+    val featureCollector =
+        remember {
+            ChildCollectorImpl<GeoJSONFeatureState, GeoJSONFeatureFingerPrint>(
+                asFlow = { it.asFlow() },
+                updateDebounce = Settings.Default.composeEventDebounce,
+            )
+        }
     val groupId = remember { UUID.randomUUID().toString() }
-    val tileServer = remember(disableTileServerCache) {
-        TileServerRegistry.get(forceNoStoreCache = disableTileServerCache)
-    }
+    val tileServer =
+        remember(disableTileServerCache) {
+            TileServerRegistry.get(forceNoStoreCache = disableTileServerCache)
+        }
     val renderer = remember(tileSize) { GeoJSONTileRenderer(tileSize = tileSize) }
 
     var isTileServerRegistered by remember { mutableStateOf(false) }
@@ -49,19 +51,21 @@ fun MapViewScope.GeoJSONLayer(
         return "$base?cb=$cacheBuster"
     }
 
-    val rasterLayerState = remember(groupId, tileServer, renderer) {
-        RasterLayerState(
-            id = "geojson-$groupId",
-            source = RasterLayerSource.UrlTemplate(
-                template = tileTemplate(0),
-                tileSize = renderer.tileSize,
-                maxZoom = GeoJSONDefaults.DEFAULT_MAX_ZOOM,
-                scheme = TileScheme.XYZ,
-            ),
-            opacity = state.opacity.coerceIn(0f, 1f),
-            visible = state.visible,
-        )
-    }
+    val rasterLayerState =
+        remember(groupId, tileServer, renderer) {
+            RasterLayerState(
+                id = "geojson-$groupId",
+                source =
+                    RasterLayerSource.UrlTemplate(
+                        template = tileTemplate(0),
+                        tileSize = renderer.tileSize,
+                        maxZoom = GeoJSONDefaults.DEFAULT_MAX_ZOOM,
+                        scheme = TileScheme.XYZ,
+                    ),
+                opacity = state.opacity.coerceIn(0f, 1f),
+                visible = state.visible,
+            )
+        }
 
     LaunchedEffect(state.opacity, state.visible) {
         rasterLayerState.opacity = state.opacity.coerceIn(0f, 1f)
@@ -95,12 +99,13 @@ fun MapViewScope.GeoJSONLayer(
         state.strokeWidth,
         state.pointRadius,
     ) {
-        val layerStyle = GeoJSONTileRenderer.LayerStyle(
-            strokeColor = state.strokeColor,
-            fillColor = state.fillColor,
-            strokeWidth = state.strokeWidth,
-            pointRadius = state.pointRadius,
-        )
+        val layerStyle =
+            GeoJSONTileRenderer.LayerStyle(
+                strokeColor = state.strokeColor,
+                fillColor = state.fillColor,
+                strokeWidth = state.strokeWidth,
+                pointRadius = state.pointRadius,
+            )
         val dynamicList = composedFeatures.value.values.toList()
         if (features.isEmpty() && dynamicList.isEmpty()) {
             hasRenderedOnce = false
@@ -114,12 +119,13 @@ fun MapViewScope.GeoJSONLayer(
         }
         hasRenderedOnce = true
         updateToken += 1
-        rasterLayerState.source = RasterLayerSource.UrlTemplate(
-            template = tileTemplate(updateToken),
-            tileSize = renderer.tileSize,
-            maxZoom = GeoJSONDefaults.DEFAULT_MAX_ZOOM,
-            scheme = TileScheme.XYZ,
-        )
+        rasterLayerState.source =
+            RasterLayerSource.UrlTemplate(
+                template = tileTemplate(updateToken),
+                tileSize = renderer.tileSize,
+                maxZoom = GeoJSONDefaults.DEFAULT_MAX_ZOOM,
+                scheme = TileScheme.XYZ,
+            )
     }
 
     CompositionLocalProvider(LocalGeoJSONFeatureCollector provides featureCollector) {
