@@ -71,7 +71,7 @@ jobs:
           echo "Checking ${GROUP_ID}:${ARTIFACT_ID} (local version ${local_version})"
 
           remote_version=""
-          if curl -fsSL "$metadata_url" -o metadata.xml; then
+          if curl -sSL "$metadata_url" -o metadata.xml; then
             remote_version=$(grep '<release>' metadata.xml | head -n1 | sed -E 's/.*<release>([^<]+)<\/release>.*/\1/' || true)
             if [[ -z "$remote_version" ]]; then
               remote_version=$(grep '<version>' metadata.xml | sed -E 's/.*<version>([^<]+)<\/version>.*/\1/' | tail -n1 || true)
