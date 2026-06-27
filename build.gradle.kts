@@ -86,83 +86,85 @@ val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("release") {
-            from(components["release"])
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
 
-            groupId = libraryGroupId
-            artifactId = libraryArtifactId
-            version = libraryVersion
+                groupId = libraryGroupId
+                artifactId = libraryArtifactId
+                version = libraryVersion
 
-            artifact(javadocJar.get())
+                artifact(javadocJar.get())
 
-            pom {
-                name.set(libraryName)
-                description.set(libraryDescription)
-                url.set(
-                    project.findProperty("libraryUrl") as String?
-                        ?: "https://github.com/MapConductor/android-geojson-layer",
-                )
-
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-
-                developers {
-                    developer {
-                        id.set(project.findProperty("developerId") as String? ?: "mapconductor")
-                        name.set(project.findProperty("developerName") as String? ?: "MapConductor Team")
-                        email.set(project.findProperty("developerEmail") as String? ?: "info@mkgeeklab.com")
-                    }
-                }
-
-                scm {
-                    connection.set("scm:git:git://github.com/MapConductor/android-geojson-layer.git")
-                    developerConnection
-                        .set("scm:git:ssh://github.com:MapConductor/android-geojson-layer.git")
+                pom {
+                    name.set(libraryName)
+                    description.set(libraryDescription)
                     url.set(
-                        project.findProperty("scmUrl") as String?
-                            ?: "https://github.com/MapConductor/android-geojson-layer.git",
+                        project.findProperty("libraryUrl") as String?
+                            ?: "https://github.com/MapConductor/android-geojson-layer",
                     )
+
+                    licenses {
+                        license {
+                            name.set("The Apache License, Version 2.0")
+                            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id.set(project.findProperty("developerId") as String? ?: "mapconductor")
+                            name.set(project.findProperty("developerName") as String? ?: "MapConductor Team")
+                            email.set(project.findProperty("developerEmail") as String? ?: "info@mkgeeklab.com")
+                        }
+                    }
+
+                    scm {
+                        connection.set("scm:git:git://github.com/MapConductor/android-geojson-layer.git")
+                        developerConnection
+                            .set("scm:git:ssh://github.com:MapConductor/android-geojson-layer.git")
+                        url.set(
+                            project.findProperty("scmUrl") as String?
+                                ?: "https://github.com/MapConductor/android-geojson-layer.git",
+                        )
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                setUrl("https://maven.pkg.github.com/MapConductor/android-geojson-layer")
+                credentials {
+                    username =
+                        project.findProperty("gpr.user") as String? ?: System.getenv("GPR_USER")
+                            ?: System.getenv("GITHUB_ACTOR")
+                    password =
+                        project.findProperty("gpr.key") as String? ?: System.getenv("GPR_TOKEN")
+                            ?: System.getenv("GITHUB_TOKEN")
                 }
             }
         }
     }
 
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            setUrl("https://maven.pkg.github.com/MapConductor/android-geojson-layer")
-            credentials {
-                username =
-                    project.findProperty("gpr.user") as String? ?: System.getenv("GPR_USER")
-                        ?: System.getenv("GITHUB_ACTOR")
-                password =
-                    project.findProperty("gpr.key") as String? ?: System.getenv("GPR_TOKEN")
-                        ?: System.getenv("GITHUB_TOKEN")
-            }
+    signing {
+        val signingKey = findProperty("signingKey") as String?
+        val signingPassword = findProperty("signingPassword") as String?
+        if (!signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()) {
+            useInMemoryPgpKeys(signingKey, signingPassword)
+            sign(publishing.publications["release"])
         }
     }
-}
 
-signing {
-    val signingKey = findProperty("signingKey") as String?
-    val signingPassword = findProperty("signingPassword") as String?
-    if (!signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()) {
-        useInMemoryPgpKeys(signingKey, signingPassword)
-        sign(publishing.publications["release"])
-    }
-}
-
-if (project == rootProject) {
-    nmcp {
-        publishAllPublicationsToCentralPortal {
-            username.set(findProperty("ossrh_username") as String? ?: System.getenv("OSSRH_USERNAME") ?: "")
-            password.set(findProperty("ossrh_password") as String? ?: System.getenv("OSSRH_PASSWORD") ?: "")
+    if (project == rootProject) {
+        nmcp {
+            publishAllPublicationsToCentralPortal {
+                username.set(findProperty("ossrh_username") as String? ?: System.getenv("OSSRH_USERNAME") ?: "")
+                password.set(findProperty("ossrh_password") as String? ?: System.getenv("OSSRH_PASSWORD") ?: "")
+            }
         }
     }
 }
