@@ -89,9 +89,7 @@ val javadocJar by tasks.registering(Jar::class) {
 publishing {
     publications {
         create<MavenPublication>("release") {
-            project.afterEvaluate {
-                from(components["release"])
-            }
+            from(components["release"])
 
             groupId = libraryGroupId
             artifactId = libraryArtifactId
