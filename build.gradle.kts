@@ -57,10 +57,10 @@ android {
 }
 
 dependencies {
-    if (findProject(":android-sdk-core") != null) {
-        implementation(project(":android-sdk-core"))
+    if (findProject(":android-sdk-compose") != null) {
+        implementation(project(":android-sdk-compose"))
     } else {
-        implementation("com.mapconductor:core:${project.findProperty("coreLibraryVersion") as String? ?: "1.0.0"}")
+        implementation("com.mapconductor:compose:${project.findProperty("coreLibraryVersion") as String? ?: "1.0.0"}")
     }
 
     implementation(libs.kotlinx.coroutines.android)

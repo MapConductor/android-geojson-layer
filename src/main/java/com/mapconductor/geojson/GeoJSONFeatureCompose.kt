@@ -5,7 +5,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import com.mapconductor.core.ChildCollector
-import com.mapconductor.core.MapViewScope
+import com.mapconductor.compose.MapViewScope
 
 val LocalGeoJSONFeatureCollector =
     compositionLocalOf<ChildCollector<GeoJSONFeatureState>> {
