@@ -9,9 +9,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.mapconductor.core.ChildCollectorImpl
 import com.mapconductor.compose.MapViewScope
 import com.mapconductor.compose.raster.RasterLayer
+import com.mapconductor.core.ChildCollectorImpl
 import com.mapconductor.core.raster.RasterLayerSource
 import com.mapconductor.core.raster.RasterLayerState
 import com.mapconductor.core.raster.TileScheme
