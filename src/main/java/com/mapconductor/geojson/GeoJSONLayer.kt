@@ -32,7 +32,7 @@ fun MapViewScope.GeoJSONLayer(
     val featureCollector =
         remember {
             ChildCollectorImpl<GeoJSONFeatureState, GeoJSONFeatureFingerPrint>(
-                asFlow = { it.asFlow() },
+                fingerPrintOf = { it.fingerPrint() },
                 updateDebounce = Settings.Default.composeEventDebounce,
             )
         }
