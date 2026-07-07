@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.mapconductor.core.features.GeoPoint
 import android.graphics.Color
+import kotlin.math.pow
 
 class GeoJSONLayerState(
     opacity: Float = GeoJSONDefaults.DEFAULT_OPACITY,
@@ -32,11 +33,27 @@ class GeoJSONLayerState(
      * Call this from your map's onMapClick handler to perform feature hit-testing.
      * If a feature is found at [geoPoint], the [onClick] callback is invoked
      * and true is returned.
+     *
+     * Pass [pixelTolerance] and [zoom] to use a pixel-based hit threshold instead of the
+     * default world-coordinate tolerances. For example, `processClick(geoPoint, 15.0, zoom)`
+     * fires only when the click is within 15 pixels of the nearest segment.
      */
-    fun processClick(geoPoint: GeoPoint): Boolean {
+    fun processClick(geoPoint: GeoPoint, pixelTolerance: Double? = null, zoom: Double? = null): Boolean {
         val r = renderer ?: return false
-        val feature = r.hitTest(geoPoint.longitude, geoPoint.latitude) ?: return false
-        onClick?.invoke(feature, geoPoint)
+        val lineTolSq: Double?
+        val pointTolSq: Double?
+        if (pixelTolerance != null && zoom != null) {
+            val worldSize = r.tileSize.toDouble() * 2.0.pow(zoom)
+            val lineTol = pixelTolerance / worldSize
+            val pointTol = pixelTolerance * 2.0 / worldSize
+            lineTolSq = lineTol * lineTol
+            pointTolSq = pointTol * pointTol
+        } else {
+            lineTolSq = null
+            pointTolSq = null
+        }
+        val hit = r.hitTest(geoPoint.longitude, geoPoint.latitude, lineTolSq, pointTolSq) ?: return false
+        onClick?.invoke(hit.feature, hit.position)
         return true
     }
 

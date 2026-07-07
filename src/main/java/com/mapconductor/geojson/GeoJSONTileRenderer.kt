@@ -1,5 +1,6 @@
 package com.mapconductor.geojson
 
+import com.mapconductor.core.features.GeoPoint
 import com.mapconductor.core.tileserver.TileProviderInterface
 import com.mapconductor.core.tileserver.TileRequest
 import java.nio.ByteBuffer
@@ -7,8 +8,11 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.math.PI
+import kotlin.math.atan
 import kotlin.math.ln
 import kotlin.math.sin
+import kotlin.math.sinh
+import kotlin.math.sqrt
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -379,10 +383,14 @@ class GeoJSONTileRenderer(
 
     private fun lonToWorld(lon: Double): Double = lon / 360.0 + 0.5
 
+    private fun worldToLon(wx: Double): Double = (wx - 0.5) * 360.0
+
     private fun latToWorld(lat: Double): Double {
         val siny = sin(lat * PI / 180.0).coerceIn(-0.9999, 0.9999)
         return 0.5 - ln((1.0 + siny) / (1.0 - siny)) / (4.0 * PI)
     }
+
+    private fun worldToLat(wy: Double): Double = atan(sinh(PI * (1.0 - 2.0 * wy))) * 180.0 / PI
 
     private fun toPixel(
         world: Double,
@@ -727,6 +735,11 @@ class GeoJSONTileRenderer(
         val pointRadius: Float,
     )
 
+    data class GeoJSONHitTestResult(
+        val feature: GeoJSONFeature,
+        val position: GeoPoint,
+    )
+
     private data class WorldBounds(
         val minX: Double,
         val maxX: Double,
@@ -854,11 +867,15 @@ class GeoJSONTileRenderer(
     fun hitTest(
         longitude: Double,
         latitude: Double,
-    ): GeoJSONFeature? {
+        lineTolSq: Double? = null,
+        pointTolSq: Double? = null,
+    ): GeoJSONHitTestResult? {
         val wx = lonToWorld(longitude)
         val wy = latToWorld(latitude)
         val currentState = state
-        val tolerance = HIT_LINE_TOLERANCE
+        val lineTolerance = if (lineTolSq != null) sqrt(lineTolSq) else HIT_LINE_TOLERANCE
+        val pointTolerance = if (pointTolSq != null) sqrt(pointTolSq) else HIT_POINT_TOLERANCE
+        val tolerance = maxOf(lineTolerance, pointTolerance)
         val candidates =
             currentState.index
                 ?.query(wx - tolerance, wy - tolerance, wx + tolerance, wy + tolerance)
@@ -867,74 +884,134 @@ class GeoJSONTileRenderer(
         for (idx in candidates.asReversed()) {
             val feature = currentState.features[idx]
             if (!feature.bounds.intersects(wx - tolerance, wy - tolerance, wx + tolerance, wy + tolerance)) continue
-            if (hitTestGeometry(wx, wy, feature.worldGeometry)) return feature.source
+            val hit = hitTestGeometry(wx, wy, feature.worldGeometry, lineTolSq, pointTolSq)
+            if (hit != null) {
+                return GeoJSONHitTestResult(
+                    feature = feature.source,
+                    position = GeoPoint.fromLongLat(
+                        longitude = worldToLon(hit.wx),
+                        latitude = worldToLat(hit.wy),
+                    ),
+                )
+            }
         }
         return null
     }
+
+    fun hitTestFeature(
+        longitude: Double,
+        latitude: Double,
+        lineTolSq: Double? = null,
+        pointTolSq: Double? = null,
+    ): GeoJSONFeature? = hitTest(longitude, latitude, lineTolSq, pointTolSq)?.feature
+
+    private data class GeometryHit(
+        val wx: Double,
+        val wy: Double,
+        val distanceSq: Double,
+    )
 
     private fun hitTestGeometry(
         wx: Double,
         wy: Double,
         geometry: WorldGeometry,
-    ): Boolean =
+        lineTolSq: Double? = null,
+        pointTolSq: Double? = null,
+    ): GeometryHit? =
         when (geometry) {
-            is WorldGeometry.Point ->
-                distanceSq(wx, wy, geometry.wx, geometry.wy) <= HIT_POINT_TOLERANCE_SQ
-
-            is WorldGeometry.Points ->
-                hitTestPoints(wx, wy, geometry.points)
-
-            is WorldGeometry.Line ->
-                geometry.rings.any { ring -> hitTestLine(wx, wy, ring.coords) }
-
-            is WorldGeometry.Polygon -> {
-                val rings = geometry.rings
-                rings.isNotEmpty() &&
-                    pointInRing(wx, wy, rings[0].coords) &&
-                    rings.drop(1).none { hole -> pointInRing(wx, wy, hole.coords) }
+            is WorldGeometry.Point -> {
+                val distanceSq = distanceSq(wx, wy, geometry.wx, geometry.wy)
+                if (distanceSq <= (pointTolSq ?: HIT_POINT_TOLERANCE_SQ)) {
+                    GeometryHit(geometry.wx, geometry.wy, distanceSq)
+                } else {
+                    null
+                }
             }
 
-            is WorldGeometry.Collection ->
-                geometry.parts.any { hitTestGeometry(wx, wy, it) }
+            is WorldGeometry.Points ->
+                hitTestPoints(wx, wy, geometry.points, pointTolSq)
 
-            WorldGeometry.Empty -> false
+            is WorldGeometry.Line ->
+                hitTestRings(wx, wy, geometry.rings, lineTolSq)
+
+            is WorldGeometry.Polygon -> {
+                if (lineTolSq != null) {
+                    hitTestRings(wx, wy, geometry.rings, lineTolSq)
+                } else {
+                    val rings = geometry.rings
+                    if (rings.isNotEmpty() &&
+                        pointInRing(wx, wy, rings[0].coords) &&
+                        rings.drop(1).none { hole -> pointInRing(wx, wy, hole.coords) }
+                    ) {
+                        GeometryHit(wx, wy, 0.0)
+                    } else {
+                        null
+                    }
+                }
+            }
+
+            is WorldGeometry.Collection -> {
+                var best: GeometryHit? = null
+                for (part in geometry.parts) {
+                    val hit = hitTestGeometry(wx, wy, part, lineTolSq, pointTolSq)
+                    if (hit != null && (best == null || hit.distanceSq < best.distanceSq)) best = hit
+                }
+                best
+            }
+
+            WorldGeometry.Empty -> null
         }
 
     private fun hitTestPoints(
         wx: Double,
         wy: Double,
         coords: DoubleArray,
-    ): Boolean {
+        pointTolSq: Double? = null,
+    ): GeometryHit? {
+        val tolSq = pointTolSq ?: HIT_POINT_TOLERANCE_SQ
+        var best: GeometryHit? = null
         var i = 0
         while (i < coords.size) {
-            if (distanceSq(wx, wy, coords[i], coords[i + 1]) <= HIT_POINT_TOLERANCE_SQ) return true
+            val distanceSq = distanceSq(wx, wy, coords[i], coords[i + 1])
+            if (distanceSq <= tolSq && (best == null || distanceSq < best.distanceSq)) {
+                best = GeometryHit(coords[i], coords[i + 1], distanceSq)
+            }
             i += 2
         }
-        return false
+        return best
+    }
+
+    private fun hitTestRings(
+        wx: Double,
+        wy: Double,
+        rings: List<WorldRing>,
+        lineTolSq: Double? = null,
+    ): GeometryHit? {
+        var best: GeometryHit? = null
+        for (ring in rings) {
+            val hit = hitTestLine(wx, wy, ring.coords, lineTolSq)
+            if (hit != null && (best == null || hit.distanceSq < best.distanceSq)) best = hit
+        }
+        return best
     }
 
     private fun hitTestLine(
         wx: Double,
         wy: Double,
         coords: DoubleArray,
-    ): Boolean {
+        lineTolSq: Double? = null,
+    ): GeometryHit? {
+        val tolSq = lineTolSq ?: HIT_LINE_TOLERANCE_SQ
+        var best: GeometryHit? = null
         var i = 2
         while (i < coords.size) {
-            if (
-                segmentDistanceSq(
-                    wx,
-                    wy,
-                    coords[i - 2],
-                    coords[i - 1],
-                    coords[i],
-                    coords[i + 1],
-                ) <= HIT_LINE_TOLERANCE_SQ
-            ) {
-                return true
+            val hit = closestPointOnSegment(wx, wy, coords[i - 2], coords[i - 1], coords[i], coords[i + 1])
+            if (hit.distanceSq <= tolSq && (best == null || hit.distanceSq < best.distanceSq)) {
+                best = hit
             }
             i += 2
         }
-        return false
+        return best
     }
 
     private fun pointInRing(
@@ -959,20 +1036,22 @@ class GeoJSONTileRenderer(
         return inside
     }
 
-    private fun segmentDistanceSq(
+    private fun closestPointOnSegment(
         px: Double,
         py: Double,
         ax: Double,
         ay: Double,
         bx: Double,
         by: Double,
-    ): Double {
+    ): GeometryHit {
         val dx = bx - ax
         val dy = by - ay
-        if (dx == 0.0 && dy == 0.0) return distanceSq(px, py, ax, ay)
+        if (dx == 0.0 && dy == 0.0) return GeometryHit(ax, ay, distanceSq(px, py, ax, ay))
         val t = ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)
         val tc = t.coerceIn(0.0, 1.0)
-        return distanceSq(px, py, ax + tc * dx, ay + tc * dy)
+        val wx = ax + tc * dx
+        val wy = ay + tc * dy
+        return GeometryHit(wx, wy, distanceSq(px, py, wx, wy))
     }
 
     companion object {
