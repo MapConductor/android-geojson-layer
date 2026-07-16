@@ -4,8 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.mapconductor.core.features.GeoPoint
-import android.graphics.Color
 import kotlin.math.pow
+import android.graphics.Color
 
 class GeoJSONLayerState(
     opacity: Float = GeoJSONDefaults.DEFAULT_OPACITY,
@@ -16,6 +16,9 @@ class GeoJSONLayerState(
     visible: Boolean = true,
     minZoom: Int = 0,
     maxZoom: Int = 22,
+    styleProvider: GeoJSONStyleProviderInterface = DefaultGeoJSONStyleProvider,
+    val onLoadStart: (() -> Unit)? = null,
+    val onLoadComplete: ((Throwable?) -> Unit)? = null,
     val onClick: ((feature: GeoJSONFeature, position: GeoPoint) -> Unit)? = null,
 ) {
     var opacity by mutableStateOf(opacity)
@@ -26,6 +29,7 @@ class GeoJSONLayerState(
     var visible by mutableStateOf(visible)
     var minZoom by mutableStateOf(minZoom)
     var maxZoom by mutableStateOf(maxZoom)
+    var styleProvider by mutableStateOf(styleProvider)
 
     internal var renderer: GeoJSONTileRenderer? = null
 
@@ -38,7 +42,11 @@ class GeoJSONLayerState(
      * default world-coordinate tolerances. For example, `processClick(geoPoint, 15.0, zoom)`
      * fires only when the click is within 15 pixels of the nearest segment.
      */
-    fun processClick(geoPoint: GeoPoint, pixelTolerance: Double? = null, zoom: Double? = null): Boolean {
+    fun processClick(
+        geoPoint: GeoPoint,
+        pixelTolerance: Double? = null,
+        zoom: Double? = null,
+    ): Boolean {
         val r = renderer ?: return false
         val lineTolSq: Double?
         val pointTolSq: Double?
@@ -66,6 +74,9 @@ class GeoJSONLayerState(
         visible: Boolean = this.visible,
         minZoom: Int = this.minZoom,
         maxZoom: Int = this.maxZoom,
+        styleProvider: GeoJSONStyleProviderInterface = this.styleProvider,
+        onLoadStart: (() -> Unit)? = this.onLoadStart,
+        onLoadComplete: ((Throwable?) -> Unit)? = this.onLoadComplete,
         onClick: ((GeoJSONFeature, GeoPoint) -> Unit)? = this.onClick,
     ): GeoJSONLayerState =
         GeoJSONLayerState(
@@ -77,6 +88,9 @@ class GeoJSONLayerState(
             visible = visible,
             minZoom = minZoom,
             maxZoom = maxZoom,
+            styleProvider = styleProvider,
+            onLoadStart = onLoadStart,
+            onLoadComplete = onLoadComplete,
             onClick = onClick,
         )
 }

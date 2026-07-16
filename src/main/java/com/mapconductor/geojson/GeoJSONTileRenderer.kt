@@ -55,26 +55,29 @@ class GeoJSONTileRenderer(
     fun update(
         features: List<GeoJSONFeatureState>,
         layerStyle: LayerStyle,
+        styleProvider: GeoJSONStyleProviderInterface = DefaultGeoJSONStyleProvider,
     ) {
-        update(emptyList(), features, layerStyle)
+        update(emptyList(), features, layerStyle, styleProvider)
     }
 
     @JvmName("updateStatic")
     fun update(
         staticFeatures: List<GeoJSONFeature>,
         layerStyle: LayerStyle,
+        styleProvider: GeoJSONStyleProviderInterface = DefaultGeoJSONStyleProvider,
     ) {
-        update(staticFeatures, emptyList(), layerStyle)
+        update(staticFeatures, emptyList(), layerStyle, styleProvider)
     }
 
     fun update(
         staticFeatures: List<GeoJSONFeature>,
         dynamicFeatures: List<GeoJSONFeatureState>,
         layerStyle: LayerStyle,
+        styleProvider: GeoJSONStyleProviderInterface = DefaultGeoJSONStyleProvider,
     ) {
         val rendered = ArrayList<RenderFeature>(staticFeatures.size + dynamicFeatures.size)
-        staticFeatures.forEach { if (it.visible) rendered.add(buildRenderFeature(it, layerStyle)) }
-        dynamicFeatures.forEach { if (it.visible) rendered.add(buildRenderFeature(it, layerStyle)) }
+        staticFeatures.forEach { if (it.visible) rendered.add(buildRenderFeature(it, layerStyle, styleProvider)) }
+        dynamicFeatures.forEach { if (it.visible) rendered.add(buildRenderFeature(it, layerStyle, styleProvider)) }
         val index = if (rendered.size >= INDEX_THRESHOLD) buildIndex(rendered) else null
         state = TileState(rendered, index)
         synchronized(cacheLock) {
@@ -416,17 +419,23 @@ class GeoJSONTileRenderer(
     private fun buildRenderFeature(
         feature: GeoJSONFeature,
         layerStyle: LayerStyle,
+        styleProvider: GeoJSONStyleProviderInterface,
     ): RenderFeature {
-        val strokeColor = feature.strokeColor ?: layerStyle.strokeColor
-        val fillColor = feature.fillColor ?: layerStyle.fillColor
-        val strokeWidth = feature.strokeWidth ?: layerStyle.strokeWidth
-        val pointRadius = feature.pointRadius ?: layerStyle.pointRadius
-        return buildRenderFeatureFromStyle(feature, feature.geometry, strokeColor, fillColor, strokeWidth, pointRadius)
+        val style = styleProvider.getStyle(feature, layerStyle)
+        return buildRenderFeatureFromStyle(
+            feature,
+            feature.geometry,
+            style.strokeColor,
+            style.fillColor,
+            style.strokeWidth,
+            style.pointRadius,
+        )
     }
 
     private fun buildRenderFeature(
         state: GeoJSONFeatureState,
         layerStyle: LayerStyle,
+        styleProvider: GeoJSONStyleProviderInterface,
     ): RenderFeature {
         val source =
             GeoJSONFeature(
@@ -439,11 +448,15 @@ class GeoJSONTileRenderer(
                 pointRadius = state.pointRadius,
                 visible = state.visible,
             )
-        val strokeColor = state.strokeColor ?: layerStyle.strokeColor
-        val fillColor = state.fillColor ?: layerStyle.fillColor
-        val strokeWidth = state.strokeWidth ?: layerStyle.strokeWidth
-        val pointRadius = state.pointRadius ?: layerStyle.pointRadius
-        return buildRenderFeatureFromStyle(source, source.geometry, strokeColor, fillColor, strokeWidth, pointRadius)
+        val style = styleProvider.getStyle(source, layerStyle)
+        return buildRenderFeatureFromStyle(
+            source,
+            source.geometry,
+            style.strokeColor,
+            style.fillColor,
+            style.strokeWidth,
+            style.pointRadius,
+        )
     }
 
     private fun buildRenderFeatureFromStyle(
@@ -888,10 +901,11 @@ class GeoJSONTileRenderer(
             if (hit != null) {
                 return GeoJSONHitTestResult(
                     feature = feature.source,
-                    position = GeoPoint.fromLongLat(
-                        longitude = worldToLon(hit.wx),
-                        latitude = worldToLat(hit.wy),
-                    ),
+                    position =
+                        GeoPoint.fromLongLat(
+                            longitude = worldToLon(hit.wx),
+                            latitude = worldToLat(hit.wy),
+                        ),
                 )
             }
         }

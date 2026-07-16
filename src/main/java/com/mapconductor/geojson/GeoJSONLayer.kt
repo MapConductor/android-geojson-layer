@@ -98,6 +98,7 @@ fun MapViewScope.GeoJSONLayer(
         state.fillColor,
         state.strokeWidth,
         state.pointRadius,
+        state.styleProvider,
     ) {
         val layerStyle =
             GeoJSONTileRenderer.LayerStyle(
@@ -110,12 +111,12 @@ fun MapViewScope.GeoJSONLayer(
         if (features.isEmpty() && dynamicList.isEmpty()) {
             hasRenderedOnce = false
             withContext(Dispatchers.Default) {
-                renderer.update(emptyList<GeoJSONFeature>(), emptyList(), layerStyle)
+                renderer.update(emptyList<GeoJSONFeature>(), emptyList(), layerStyle, state.styleProvider)
             }
             return@LaunchedEffect
         }
         withContext(Dispatchers.Default) {
-            renderer.update(features, dynamicList, layerStyle)
+            renderer.update(features, dynamicList, layerStyle, state.styleProvider)
         }
         hasRenderedOnce = true
         updateToken += 1
