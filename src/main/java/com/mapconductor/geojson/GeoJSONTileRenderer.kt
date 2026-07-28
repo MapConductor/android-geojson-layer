@@ -88,7 +88,9 @@ class GeoJSONTileRenderer(
 
     override fun renderTile(request: TileRequest): ByteArray? {
         val epoch = cacheEpoch
-        val key = "$epoch:${request.z}/${request.x}/${request.y}"
+        val pixelRatio = request.pixelRatio.coerceIn(1, MAX_PIXEL_RATIO)
+        val normalizedRequest = request.copy(pixelRatio = pixelRatio)
+        val key = "$epoch:${pixelRatio}x:${request.z}/${request.x}/${request.y}"
         synchronized(cacheLock) {
             cache.get(key)?.let { return if (it === emptyTileMarker) null else it }
         }
@@ -97,7 +99,7 @@ class GeoJSONTileRenderer(
         val existing = inFlight.putIfAbsent(key, future)
         if (existing != null) return existing.join()
 
-        val job = RenderJob(key = key, epoch = epoch, request = request, state = state, future = future)
+        val job = RenderJob(key = key, epoch = epoch, request = normalizedRequest, state = state, future = future)
         try {
             renderQueue.put(job)
         } catch (_: InterruptedException) {
@@ -162,9 +164,12 @@ class GeoJSONTileRenderer(
                 ?: tileState.features.indices.toList()
 
         var hasContent = false
-        val bitmap = getBitmap()
+        val pixelRatio = request.pixelRatio
+        val renderSize = tileSize * pixelRatio
+        val bitmap = getBitmap(renderSize)
         bitmap.eraseColor(android.graphics.Color.TRANSPARENT)
         val canvas = Canvas(bitmap)
+        canvas.scale(pixelRatio.toFloat(), pixelRatio.toFloat())
 
         val worldSize = tileSize.toDouble() * worldTileCount
         val originX = x.toDouble() * tileSize
@@ -185,6 +190,7 @@ class GeoJSONTileRenderer(
                     tileMinY = tileMinY,
                     tileMaxX = tileMaxX,
                     tileMaxY = tileMaxY,
+                    pixelRatio = pixelRatio,
                 )
             ) {
                 hasContent = true
@@ -206,6 +212,7 @@ class GeoJSONTileRenderer(
         tileMinY: Double,
         tileMaxX: Double,
         tileMaxY: Double,
+        pixelRatio: Int,
     ): Boolean =
         renderGeometry(
             canvas,
@@ -219,6 +226,7 @@ class GeoJSONTileRenderer(
             tileMinY,
             tileMaxX,
             tileMaxY,
+            pixelRatio,
         )
 
     private fun renderGeometry(
@@ -233,6 +241,7 @@ class GeoJSONTileRenderer(
         tileMinY: Double,
         tileMaxX: Double,
         tileMaxY: Double,
+        pixelRatio: Int,
     ): Boolean =
         when (geometry) {
             is WorldGeometry.Point -> {
@@ -269,6 +278,7 @@ class GeoJSONTileRenderer(
                         tileMaxX,
                         tileMaxY,
                         feature.strokePaint?.strokeWidth ?: feature.fillPaint.strokeWidth,
+                        pixelRatio,
                     )
                 if (!path.isEmpty) {
                     canvas.drawPath(path, feature.strokePaint ?: feature.fillPaint)
@@ -279,7 +289,7 @@ class GeoJSONTileRenderer(
             }
 
             is WorldGeometry.Polygon -> {
-                val path = buildPolygonPath(geometry.rings, zoom, worldSize, originX, originY)
+                val path = buildPolygonPath(geometry.rings, zoom, worldSize, originX, originY, pixelRatio)
                 if (!path.isEmpty) {
                     canvas.drawPath(path, feature.fillPaint)
                     feature.strokePaint?.let { canvas.drawPath(path, it) }
@@ -305,6 +315,7 @@ class GeoJSONTileRenderer(
                             tileMinY,
                             tileMaxX,
                             tileMaxY,
+                            pixelRatio,
                         )
                     ) {
                         drew = true
@@ -327,6 +338,7 @@ class GeoJSONTileRenderer(
         tileMaxX: Double,
         tileMaxY: Double,
         strokeWidth: Float,
+        pixelRatio: Int,
     ): Path {
         val path = getPath()
         path.rewind()
@@ -336,7 +348,7 @@ class GeoJSONTileRenderer(
         val maxX = tileMaxX + margin
         val maxY = tileMaxY + margin
         for (ring in rings) {
-            val coords = ring.coordsForZoom(zoom, tileSize)
+            val coords = ring.coordsForZoom(zoom, tileSize, pixelRatio)
             if (coords.size < 4) continue
             var needsMove = true
             var i = 2
@@ -366,12 +378,13 @@ class GeoJSONTileRenderer(
         worldSize: Double,
         originX: Double,
         originY: Double,
+        pixelRatio: Int,
     ): Path {
         val path = getPath()
         path.rewind()
         path.fillType = Path.FillType.EVEN_ODD
         for (ring in rings) {
-            val coords = ring.coordsForZoom(zoom, tileSize)
+            val coords = ring.coordsForZoom(zoom, tileSize, pixelRatio)
             if (coords.size < 6) continue
             path.moveTo(toPixel(coords[0], worldSize, originX), toPixel(coords[1], worldSize, originY))
             var i = 2
@@ -701,16 +714,16 @@ class GeoJSONTileRenderer(
     private val threadLocalPixelBuffer = ThreadLocal<ByteBuffer>()
     private val threadLocalRgba = ThreadLocal<ByteArray>()
 
-    private fun getBitmap(): Bitmap {
+    private fun getBitmap(renderSize: Int): Bitmap {
         val existing = threadLocalBitmap.get()
         if (existing != null &&
             !existing.isRecycled &&
-            existing.width == tileSize &&
-            existing.height == tileSize
+            existing.width == renderSize &&
+            existing.height == renderSize
         ) {
             return existing
         }
-        val bm = Bitmap.createBitmap(tileSize, tileSize, Bitmap.Config.ARGB_8888)
+        val bm = Bitmap.createBitmap(renderSize, renderSize, Bitmap.Config.ARGB_8888)
         threadLocalBitmap.set(bm)
         return bm
     }
@@ -797,16 +810,20 @@ class GeoJSONTileRenderer(
     ) {
         private val simplifiedByZoom =
             java.util.concurrent.atomic
-                .AtomicReferenceArray<DoubleArray>(MAX_SIMPLIFY_ZOOM + 1)
+                .AtomicReferenceArray<DoubleArray>((MAX_SIMPLIFY_ZOOM + 1) * MAX_PIXEL_RATIO)
 
         fun coordsForZoom(
             zoom: Int,
             tileSize: Int,
+            pixelRatio: Int,
         ): DoubleArray {
             if (coords.size < 6) return coords
-            val cacheIndex = zoom.coerceIn(0, MAX_SIMPLIFY_ZOOM)
+            val normalizedZoom = zoom.coerceIn(0, MAX_SIMPLIFY_ZOOM)
+            val normalizedPixelRatio = pixelRatio.coerceIn(1, MAX_PIXEL_RATIO)
+            val cacheIndex = normalizedZoom * MAX_PIXEL_RATIO + normalizedPixelRatio - 1
             simplifiedByZoom.get(cacheIndex)?.let { return it }
-            val tolerance = 0.5 / (tileSize.toDouble() * (1 shl cacheIndex))
+            val tolerance =
+                0.5 / (tileSize.toDouble() * normalizedPixelRatio * (1 shl normalizedZoom))
             val simplified = simplifyRadial(coords, tolerance)
             return if (simplifiedByZoom.compareAndSet(cacheIndex, null, simplified)) {
                 simplified
@@ -1077,6 +1094,7 @@ class GeoJSONTileRenderer(
         private const val INDEX_THRESHOLD = 256
         private const val INDEX_GRID_SIZE = 64
         private const val MAX_SIMPLIFY_ZOOM = 22
+        private const val MAX_PIXEL_RATIO = 3
 
         // World-coordinate hit tolerances (~0.0002 ≈ 72m at equator, ~3-5px at zoom 14)
         private const val HIT_LINE_TOLERANCE = 0.0002
