@@ -5,10 +5,10 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import com.mapconductor.compose.MapViewScope
-import com.mapconductor.core.ChildCollector
+import com.mapconductor.core.OverlayCollectorInterface
 
 val LocalGeoJSONFeatureCollector =
-    compositionLocalOf<ChildCollector<GeoJSONFeatureState>> {
+    compositionLocalOf<OverlayCollectorInterface<GeoJSONFeatureState>> {
         error("GeoJSONFeature must be placed inside a GeoJSONLayer composable")
     }
 

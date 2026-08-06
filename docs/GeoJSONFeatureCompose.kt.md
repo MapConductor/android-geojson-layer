@@ -8,7 +8,7 @@ Composition local that exposes the active child feature collector while `GeoJSON
 being composed.
 
 ```kotlin
-val LocalGeoJSONFeatureCollector: ProvidableCompositionLocal<ChildCollector<GeoJSONFeatureState>?>
+val LocalGeoJSONFeatureCollector: ProvidableCompositionLocal<OverlayCollectorInterface<GeoJSONFeatureState>?>
 ```
 
 ## GeoJSONFeature
