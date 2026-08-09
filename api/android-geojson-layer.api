@@ -1,0 +1,446 @@
+public final class com.mapconductor.geojson.DefaultGeoJSONStyleProvider implements com.mapconductor.geojson.GeoJSONStyleProviderInterface {
+  public static final com.mapconductor.geojson.DefaultGeoJSONStyleProvider INSTANCE;
+  public com.mapconductor.geojson.GeoJSONTileRenderer$LayerStyle getStyle(com.mapconductor.geojson.GeoJSONFeature, com.mapconductor.geojson.GeoJSONTileRenderer$LayerStyle);
+}
+public final class com.mapconductor.geojson.FastPngEncoder {
+  public static final com.mapconductor.geojson.FastPngEncoder INSTANCE;
+  public final byte[] encode(int, int, byte[]);
+}
+public final class com.mapconductor.geojson.GeoJSONDefaults {
+  public static final com.mapconductor.geojson.GeoJSONDefaults INSTANCE;
+  public static final float DEFAULT_OPACITY;
+  public static final float DEFAULT_STROKE_WIDTH;
+  public static final float DEFAULT_POINT_RADIUS;
+  public static final int DEFAULT_TILE_SIZE;
+  public static final int DEFAULT_MAX_ZOOM;
+  public final int getDEFAULT_STROKE_COLOR();
+  public final int getDEFAULT_FILL_COLOR();
+}
+public final class com.mapconductor.geojson.GeoJSONFeature {
+  public com.mapconductor.geojson.GeoJSONFeature(java.lang.String, com.mapconductor.geojson.GeoJSONGeometry, java.util.Map<java.lang.String, ? extends java.lang.Object>, java.lang.Integer, java.lang.Integer, java.lang.Float, java.lang.Float, boolean);
+  public com.mapconductor.geojson.GeoJSONFeature(java.lang.String, com.mapconductor.geojson.GeoJSONGeometry, java.util.Map, java.lang.Integer, java.lang.Integer, java.lang.Float, java.lang.Float, boolean, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final java.lang.String getId();
+  public final com.mapconductor.geojson.GeoJSONGeometry getGeometry();
+  public final java.util.Map<java.lang.String, java.lang.Object> getProperties();
+  public final java.lang.Integer getStrokeColor();
+  public final java.lang.Integer getFillColor();
+  public final java.lang.Float getStrokeWidth();
+  public final java.lang.Float getPointRadius();
+  public final boolean getVisible();
+  public final java.lang.String component1();
+  public final com.mapconductor.geojson.GeoJSONGeometry component2();
+  public final java.util.Map<java.lang.String, java.lang.Object> component3();
+  public final java.lang.Integer component4();
+  public final java.lang.Integer component5();
+  public final java.lang.Float component6();
+  public final java.lang.Float component7();
+  public final boolean component8();
+  public final com.mapconductor.geojson.GeoJSONFeature copy(java.lang.String, com.mapconductor.geojson.GeoJSONGeometry, java.util.Map<java.lang.String, ? extends java.lang.Object>, java.lang.Integer, java.lang.Integer, java.lang.Float, java.lang.Float, boolean);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.GeoJSONFeatureComposeKt {
+  public static final androidx.compose.runtime.ProvidableCompositionLocal<com.mapconductor.core.OverlayCollectorInterface<com.mapconductor.geojson.GeoJSONFeatureState>> getLocalGeoJSONFeatureCollector();
+  public static final void GeoJSONFeature(com.mapconductor.compose.MapViewScope, com.mapconductor.geojson.GeoJSONFeatureState, androidx.compose.runtime.Composer, int);
+  public static final void GeoJSONFeatures(com.mapconductor.compose.MapViewScope, java.util.List<com.mapconductor.geojson.GeoJSONFeatureState>, androidx.compose.runtime.Composer, int);
+}
+public final class com.mapconductor.geojson.GeoJSONFeatureFingerPrint {
+  public com.mapconductor.geojson.GeoJSONFeatureFingerPrint(int, int, int, int, int);
+  public final int getId();
+  public final int getGeometry();
+  public final int getProperties();
+  public final int getStyle();
+  public final int getVisible();
+  public final int component1();
+  public final int component2();
+  public final int component3();
+  public final int component4();
+  public final int component5();
+  public final com.mapconductor.geojson.GeoJSONFeatureFingerPrint copy(int, int, int, int, int);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.GeoJSONFeatureState implements com.mapconductor.core.ComponentState {
+  public static final com.mapconductor.geojson.GeoJSONFeatureState$Companion Companion;
+  public com.mapconductor.geojson.GeoJSONFeatureState(java.lang.String, com.mapconductor.geojson.GeoJSONGeometry, java.util.Map<java.lang.String, ? extends java.lang.Object>, java.lang.Integer, java.lang.Integer, java.lang.Float, java.lang.Float, boolean);
+  public com.mapconductor.geojson.GeoJSONFeatureState(java.lang.String, com.mapconductor.geojson.GeoJSONGeometry, java.util.Map, java.lang.Integer, java.lang.Integer, java.lang.Float, java.lang.Float, boolean, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public java.lang.String getId();
+  public final com.mapconductor.geojson.GeoJSONGeometry getGeometry();
+  public final void setGeometry(com.mapconductor.geojson.GeoJSONGeometry);
+  public final java.util.Map<java.lang.String, java.lang.Object> getProperties();
+  public final void setProperties(java.util.Map<java.lang.String, ? extends java.lang.Object>);
+  public final java.lang.Integer getStrokeColor();
+  public final void setStrokeColor(java.lang.Integer);
+  public final java.lang.Integer getFillColor();
+  public final void setFillColor(java.lang.Integer);
+  public final java.lang.Float getStrokeWidth();
+  public final void setStrokeWidth(java.lang.Float);
+  public final java.lang.Float getPointRadius();
+  public final void setPointRadius(java.lang.Float);
+  public final boolean getVisible();
+  public final void setVisible(boolean);
+  public final com.mapconductor.geojson.GeoJSONFeatureFingerPrint fingerPrint();
+  public final kotlinx.coroutines.flow.Flow<com.mapconductor.geojson.GeoJSONFeatureFingerPrint> asFlow();
+}
+public final class com.mapconductor.geojson.GeoJSONFeatureState$Companion {
+}
+public abstract class com.mapconductor.geojson.GeoJSONGeometry {
+  public com.mapconductor.geojson.GeoJSONGeometry(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.mapconductor.geojson.GeoJSONGeometry$Empty extends com.mapconductor.geojson.GeoJSONGeometry {
+  public static final com.mapconductor.geojson.GeoJSONGeometry$Empty INSTANCE;
+}
+public final class com.mapconductor.geojson.GeoJSONGeometry$GeometryCollection extends com.mapconductor.geojson.GeoJSONGeometry {
+  public final java.util.List<com.mapconductor.geojson.GeoJSONGeometry> getGeometries();
+  public final java.util.List<com.mapconductor.geojson.GeoJSONGeometry> component1();
+  public final com.mapconductor.geojson.GeoJSONGeometry$GeometryCollection copy(java.util.List<? extends com.mapconductor.geojson.GeoJSONGeometry>);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.GeoJSONGeometry$LineString extends com.mapconductor.geojson.GeoJSONGeometry {
+  public final java.util.List<com.mapconductor.geojson.LonLat> getCoordinates();
+  public final java.util.List<com.mapconductor.geojson.LonLat> component1();
+  public final com.mapconductor.geojson.GeoJSONGeometry$LineString copy(java.util.List<com.mapconductor.geojson.LonLat>);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.GeoJSONGeometry$MultiLineString extends com.mapconductor.geojson.GeoJSONGeometry {
+  public final java.util.List<java.util.List<com.mapconductor.geojson.LonLat>> getLines();
+  public final java.util.List<java.util.List<com.mapconductor.geojson.LonLat>> component1();
+  public final com.mapconductor.geojson.GeoJSONGeometry$MultiLineString copy(java.util.List<? extends java.util.List<com.mapconductor.geojson.LonLat>>);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.GeoJSONGeometry$MultiPoint extends com.mapconductor.geojson.GeoJSONGeometry {
+  public final java.util.List<com.mapconductor.geojson.GeoJSONGeometry$Point> getPoints();
+  public final java.util.List<com.mapconductor.geojson.GeoJSONGeometry$Point> component1();
+  public final com.mapconductor.geojson.GeoJSONGeometry$MultiPoint copy(java.util.List<com.mapconductor.geojson.GeoJSONGeometry$Point>);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.GeoJSONGeometry$MultiPolygon extends com.mapconductor.geojson.GeoJSONGeometry {
+  public final java.util.List<java.util.List<java.util.List<com.mapconductor.geojson.LonLat>>> getPolygons();
+  public final java.util.List<java.util.List<java.util.List<com.mapconductor.geojson.LonLat>>> component1();
+  public final com.mapconductor.geojson.GeoJSONGeometry$MultiPolygon copy(java.util.List<? extends java.util.List<? extends java.util.List<com.mapconductor.geojson.LonLat>>>);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.GeoJSONGeometry$Point extends com.mapconductor.geojson.GeoJSONGeometry {
+  public final double getLongitude();
+  public final double getLatitude();
+  public final double component1();
+  public final double component2();
+  public final com.mapconductor.geojson.GeoJSONGeometry$Point copy(double, double);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.GeoJSONGeometry$Polygon extends com.mapconductor.geojson.GeoJSONGeometry {
+  public final java.util.List<java.util.List<com.mapconductor.geojson.LonLat>> getRings();
+  public final java.util.List<java.util.List<com.mapconductor.geojson.LonLat>> component1();
+  public final com.mapconductor.geojson.GeoJSONGeometry$Polygon copy(java.util.List<? extends java.util.List<com.mapconductor.geojson.LonLat>>);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.GeoJSONHitTester {
+  public static final com.mapconductor.geojson.GeoJSONHitTester$Companion Companion;
+  public com.mapconductor.geojson.GeoJSONHitTester();
+  public final com.mapconductor.geojson.GeoJSONTileRenderer$GeoJSONHitTestResult hitTest(double, double, java.util.List<com.mapconductor.geojson.RenderFeature>, com.mapconductor.geojson.GeoJSONSpatialIndex, java.lang.Double, java.lang.Double);
+}
+public final class com.mapconductor.geojson.GeoJSONHitTester$Companion {
+}
+public final class com.mapconductor.geojson.GeoJSONLayerKt {
+  public static final void GeoJSONLayer(com.mapconductor.compose.MapViewScope, com.mapconductor.geojson.GeoJSONLayerState, java.util.List<com.mapconductor.geojson.GeoJSONFeature>, int, boolean, kotlin.jvm.functions.Function2<? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, androidx.compose.runtime.Composer, int, int);
+}
+public final class com.mapconductor.geojson.GeoJSONLayerState {
+  public com.mapconductor.geojson.GeoJSONLayerState(float, int, int, float, float, boolean, int, int, com.mapconductor.geojson.GeoJSONStyleProviderInterface, kotlin.jvm.functions.Function0<kotlin.Unit>, kotlin.jvm.functions.Function1<? super java.lang.Throwable, kotlin.Unit>, kotlin.jvm.functions.Function2<? super com.mapconductor.geojson.GeoJSONFeature, ? super com.mapconductor.core.features.GeoPoint, kotlin.Unit>);
+  public com.mapconductor.geojson.GeoJSONLayerState(float, int, int, float, float, boolean, int, int, com.mapconductor.geojson.GeoJSONStyleProviderInterface, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function2, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final kotlin.jvm.functions.Function0<kotlin.Unit> getOnLoadStart();
+  public final kotlin.jvm.functions.Function1<java.lang.Throwable, kotlin.Unit> getOnLoadComplete();
+  public final kotlin.jvm.functions.Function2<com.mapconductor.geojson.GeoJSONFeature, com.mapconductor.core.features.GeoPoint, kotlin.Unit> getOnClick();
+  public final float getOpacity();
+  public final void setOpacity(float);
+  public final int getStrokeColor();
+  public final void setStrokeColor(int);
+  public final int getFillColor();
+  public final void setFillColor(int);
+  public final float getStrokeWidth();
+  public final void setStrokeWidth(float);
+  public final float getPointRadius();
+  public final void setPointRadius(float);
+  public final boolean getVisible();
+  public final void setVisible(boolean);
+  public final int getMinZoom();
+  public final void setMinZoom(int);
+  public final int getMaxZoom();
+  public final void setMaxZoom(int);
+  public final com.mapconductor.geojson.GeoJSONStyleProviderInterface getStyleProvider();
+  public final void setStyleProvider(com.mapconductor.geojson.GeoJSONStyleProviderInterface);
+  public final boolean processClick(com.mapconductor.core.features.GeoPoint, java.lang.Double, java.lang.Double);
+  public final com.mapconductor.geojson.GeoJSONLayerState copy(float, int, int, float, float, boolean, int, int, com.mapconductor.geojson.GeoJSONStyleProviderInterface, kotlin.jvm.functions.Function0<kotlin.Unit>, kotlin.jvm.functions.Function1<? super java.lang.Throwable, kotlin.Unit>, kotlin.jvm.functions.Function2<? super com.mapconductor.geojson.GeoJSONFeature, ? super com.mapconductor.core.features.GeoPoint, kotlin.Unit>);
+  public com.mapconductor.geojson.GeoJSONLayerState();
+}
+public final class com.mapconductor.geojson.GeoJSONParser {
+  public static final com.mapconductor.geojson.GeoJSONParser INSTANCE;
+  public final java.util.List<com.mapconductor.geojson.GeoJSONFeature> parseStream(java.io.InputStream);
+  public final void streamParse(java.io.InputStream, kotlin.jvm.functions.Function1<? super com.mapconductor.geojson.GeoJSONFeature, kotlin.Unit>);
+  public final java.util.List<com.mapconductor.geojson.GeoJSONFeatureState> parse(java.lang.String);
+  public final com.mapconductor.geojson.GeoJSONFeatureState parseFeature(java.lang.String);
+  public final com.mapconductor.geojson.GeoJSONGeometry parseGeometry(java.lang.String);
+}
+public final class com.mapconductor.geojson.GeoJSONRenderFeatureBuilder {
+  public static final com.mapconductor.geojson.GeoJSONRenderFeatureBuilder INSTANCE;
+  public final com.mapconductor.geojson.RenderFeature build(com.mapconductor.geojson.GeoJSONFeature, com.mapconductor.geojson.GeoJSONTileRenderer$LayerStyle, com.mapconductor.geojson.GeoJSONStyleProviderInterface);
+  public final com.mapconductor.geojson.RenderFeature build(com.mapconductor.geojson.GeoJSONFeatureState, com.mapconductor.geojson.GeoJSONTileRenderer$LayerStyle, com.mapconductor.geojson.GeoJSONStyleProviderInterface);
+}
+public final class com.mapconductor.geojson.GeoJSONSeqParser {
+  public static final com.mapconductor.geojson.GeoJSONSeqParser INSTANCE;
+  public final java.util.List<com.mapconductor.geojson.GeoJSONFeature> parse(java.io.InputStream);
+  public final java.util.List<com.mapconductor.geojson.GeoJSONFeature> parse(java.io.File);
+  public final void streamParse(java.io.InputStream, kotlin.jvm.functions.Function1<? super com.mapconductor.geojson.GeoJSONFeature, kotlin.Unit>);
+  public final void streamParse(java.io.File, kotlin.jvm.functions.Function1<? super com.mapconductor.geojson.GeoJSONFeature, kotlin.Unit>);
+}
+public final class com.mapconductor.geojson.GeoJSONSpatialIndex {
+  public static final com.mapconductor.geojson.GeoJSONSpatialIndex$Companion Companion;
+  public static final int GRID_SIZE;
+  public static final int BUILD_THRESHOLD;
+  public com.mapconductor.geojson.GeoJSONSpatialIndex(java.util.List<java.lang.Integer>[], int);
+  public final java.util.List<java.lang.Integer> query(double, double, double, double);
+}
+public final class com.mapconductor.geojson.GeoJSONSpatialIndex$Companion {
+  public final com.mapconductor.geojson.GeoJSONSpatialIndex build(java.util.List<com.mapconductor.geojson.RenderFeature>);
+}
+public interface com.mapconductor.geojson.GeoJSONStyleProviderInterface {
+  public abstract com.mapconductor.geojson.GeoJSONTileRenderer$LayerStyle getStyle(com.mapconductor.geojson.GeoJSONFeature, com.mapconductor.geojson.GeoJSONTileRenderer$LayerStyle);
+}
+public final class com.mapconductor.geojson.GeoJSONTilePainter {
+  public com.mapconductor.geojson.GeoJSONTilePainter(int);
+  public final android.graphics.Bitmap beginTile(int);
+  public final boolean drawFeature(android.graphics.Canvas, com.mapconductor.geojson.RenderFeature, com.mapconductor.geojson.TilePaintContext);
+  public final byte[] toPng(android.graphics.Bitmap);
+}
+public final class com.mapconductor.geojson.GeoJSONTileRenderer implements com.mapconductor.core.tileserver.TileProviderInterface {
+  public static final com.mapconductor.geojson.GeoJSONTileRenderer$Companion Companion;
+  public com.mapconductor.geojson.GeoJSONTileRenderer(int, int, int);
+  public com.mapconductor.geojson.GeoJSONTileRenderer(int, int, int, int, kotlin.jvm.internal.DefaultConstructorMarker);
+  public final int getTileSize();
+  public final void updateDynamic(java.util.List<com.mapconductor.geojson.GeoJSONFeatureState>, com.mapconductor.geojson.GeoJSONTileRenderer$LayerStyle, com.mapconductor.geojson.GeoJSONStyleProviderInterface);
+  public final void updateStatic(java.util.List<com.mapconductor.geojson.GeoJSONFeature>, com.mapconductor.geojson.GeoJSONTileRenderer$LayerStyle, com.mapconductor.geojson.GeoJSONStyleProviderInterface);
+  public final void update(java.util.List<com.mapconductor.geojson.GeoJSONFeature>, java.util.List<com.mapconductor.geojson.GeoJSONFeatureState>, com.mapconductor.geojson.GeoJSONTileRenderer$LayerStyle, com.mapconductor.geojson.GeoJSONStyleProviderInterface);
+  public byte[] renderTile(com.mapconductor.core.tileserver.TileRequest);
+  public final com.mapconductor.geojson.GeoJSONTileRenderer$GeoJSONHitTestResult hitTest(double, double, java.lang.Double, java.lang.Double);
+  public final com.mapconductor.geojson.GeoJSONFeature hitTestFeature(double, double, java.lang.Double, java.lang.Double);
+  public com.mapconductor.geojson.GeoJSONTileRenderer();
+}
+public final class com.mapconductor.geojson.GeoJSONTileRenderer$Companion {
+}
+public final class com.mapconductor.geojson.GeoJSONTileRenderer$GeoJSONHitTestResult {
+  public final com.mapconductor.geojson.GeoJSONFeature getFeature();
+  public final com.mapconductor.core.features.GeoPoint getPosition();
+  public final com.mapconductor.geojson.GeoJSONFeature component1();
+  public final com.mapconductor.core.features.GeoPoint component2();
+  public final com.mapconductor.geojson.GeoJSONTileRenderer$GeoJSONHitTestResult copy(com.mapconductor.geojson.GeoJSONFeature, com.mapconductor.core.features.GeoPoint);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.GeoJSONTileRenderer$LayerStyle {
+  public final int getStrokeColor();
+  public final int getFillColor();
+  public final float getStrokeWidth();
+  public final float getPointRadius();
+  public final int component1();
+  public final int component2();
+  public final float component3();
+  public final float component4();
+  public final com.mapconductor.geojson.GeoJSONTileRenderer$LayerStyle copy(int, int, float, float);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+final class com.mapconductor.geojson.GeoJSONTileRenderer$RenderJob {
+  public final java.lang.String getKey();
+  public final long getEpoch();
+  public final com.mapconductor.core.tileserver.TileRequest getRequest();
+  public final com.mapconductor.geojson.GeoJSONTileRenderer$TileState getState();
+  public final java.util.concurrent.CompletableFuture<byte[]> getFuture();
+  public final java.lang.String component1();
+  public final long component2();
+  public final com.mapconductor.core.tileserver.TileRequest component3();
+  public final com.mapconductor.geojson.GeoJSONTileRenderer$TileState component4();
+  public final java.util.concurrent.CompletableFuture<byte[]> component5();
+  public final com.mapconductor.geojson.GeoJSONTileRenderer$RenderJob copy(java.lang.String, long, com.mapconductor.core.tileserver.TileRequest, com.mapconductor.geojson.GeoJSONTileRenderer$TileState, java.util.concurrent.CompletableFuture<byte[]>);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+final class com.mapconductor.geojson.GeoJSONTileRenderer$TileState {
+  public final java.util.List<com.mapconductor.geojson.RenderFeature> getFeatures();
+  public final com.mapconductor.geojson.GeoJSONSpatialIndex getIndex();
+  public final java.util.List<com.mapconductor.geojson.RenderFeature> component1();
+  public final com.mapconductor.geojson.GeoJSONSpatialIndex component2();
+  public final com.mapconductor.geojson.GeoJSONTileRenderer$TileState copy(java.util.List<com.mapconductor.geojson.RenderFeature>, com.mapconductor.geojson.GeoJSONSpatialIndex);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.GeoJSONWorld {
+  public static final com.mapconductor.geojson.GeoJSONWorld INSTANCE;
+  public static final int MAX_SIMPLIFY_ZOOM;
+  public static final int MAX_PIXEL_RATIO;
+  public final double lonToWorld(double);
+  public final double worldToLon(double);
+  public final double latToWorld(double);
+  public final double worldToLat(double);
+  public final float toPixel(double, double, double);
+  public final boolean segmentOutside(double, double, double, double, double, double, double, double);
+  public final com.mapconductor.geojson.WorldGeometry toWorldGeometry(com.mapconductor.geojson.GeoJSONGeometry);
+  public final com.mapconductor.geojson.WorldBounds computeBounds(com.mapconductor.geojson.WorldGeometry);
+  public final double distanceSq(double, double, double, double);
+  public final double[] simplifyRadial(double[], double);
+}
+public final class com.mapconductor.geojson.GeometryHit {
+  public com.mapconductor.geojson.GeometryHit(double, double, double);
+  public final double getWx();
+  public final double getWy();
+  public final double getDistanceSq();
+  public final double component1();
+  public final double component2();
+  public final double component3();
+  public final com.mapconductor.geojson.GeometryHit copy(double, double, double);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.LonLat {
+  public com.mapconductor.geojson.LonLat(double, double);
+  public final double getLongitude();
+  public final double getLatitude();
+  public final double component1();
+  public final double component2();
+  public final com.mapconductor.geojson.LonLat copy(double, double);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.RenderFeature {
+  public com.mapconductor.geojson.RenderFeature(com.mapconductor.geojson.GeoJSONFeature, com.mapconductor.geojson.WorldGeometry, com.mapconductor.geojson.WorldBounds, android.graphics.Paint, android.graphics.Paint, float);
+  public final com.mapconductor.geojson.GeoJSONFeature getSource();
+  public final com.mapconductor.geojson.WorldGeometry getWorldGeometry();
+  public final com.mapconductor.geojson.WorldBounds getBounds();
+  public final android.graphics.Paint getFillPaint();
+  public final android.graphics.Paint getStrokePaint();
+  public final float getPointRadius();
+  public final com.mapconductor.geojson.GeoJSONFeature component1();
+  public final com.mapconductor.geojson.WorldGeometry component2();
+  public final com.mapconductor.geojson.WorldBounds component3();
+  public final android.graphics.Paint component4();
+  public final android.graphics.Paint component5();
+  public final float component6();
+  public final com.mapconductor.geojson.RenderFeature copy(com.mapconductor.geojson.GeoJSONFeature, com.mapconductor.geojson.WorldGeometry, com.mapconductor.geojson.WorldBounds, android.graphics.Paint, android.graphics.Paint, float);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.TilePaintContext {
+  public com.mapconductor.geojson.TilePaintContext(int, double, double, double, double, double, double, double, int);
+  public final int getZoom();
+  public final double getWorldSize();
+  public final double getOriginX();
+  public final double getOriginY();
+  public final double getTileMinX();
+  public final double getTileMinY();
+  public final double getTileMaxX();
+  public final double getTileMaxY();
+  public final int getPixelRatio();
+  public final int component1();
+  public final double component2();
+  public final double component3();
+  public final double component4();
+  public final double component5();
+  public final double component6();
+  public final double component7();
+  public final double component8();
+  public final int component9();
+  public final com.mapconductor.geojson.TilePaintContext copy(int, double, double, double, double, double, double, double, int);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.WorldBounds {
+  public com.mapconductor.geojson.WorldBounds(double, double, double, double);
+  public final double getMinX();
+  public final double getMaxX();
+  public final double getMinY();
+  public final double getMaxY();
+  public final boolean intersects(double, double, double, double);
+  public final double component1();
+  public final double component2();
+  public final double component3();
+  public final double component4();
+  public final com.mapconductor.geojson.WorldBounds copy(double, double, double, double);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public abstract class com.mapconductor.geojson.WorldGeometry {
+  public com.mapconductor.geojson.WorldGeometry(kotlin.jvm.internal.DefaultConstructorMarker);
+}
+public final class com.mapconductor.geojson.WorldGeometry$Collection extends com.mapconductor.geojson.WorldGeometry {
+  public final java.util.List<com.mapconductor.geojson.WorldGeometry> getParts();
+  public final java.util.List<com.mapconductor.geojson.WorldGeometry> component1();
+  public final com.mapconductor.geojson.WorldGeometry$Collection copy(java.util.List<? extends com.mapconductor.geojson.WorldGeometry>);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.WorldGeometry$Empty extends com.mapconductor.geojson.WorldGeometry {
+  public static final com.mapconductor.geojson.WorldGeometry$Empty INSTANCE;
+}
+public final class com.mapconductor.geojson.WorldGeometry$Line extends com.mapconductor.geojson.WorldGeometry {
+  public final java.util.List<com.mapconductor.geojson.WorldRing> getRings();
+  public final java.util.List<com.mapconductor.geojson.WorldRing> component1();
+  public final com.mapconductor.geojson.WorldGeometry$Line copy(java.util.List<com.mapconductor.geojson.WorldRing>);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.WorldGeometry$Point extends com.mapconductor.geojson.WorldGeometry {
+  public final double getWx();
+  public final double getWy();
+  public final double component1();
+  public final double component2();
+  public final com.mapconductor.geojson.WorldGeometry$Point copy(double, double);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.WorldGeometry$Points extends com.mapconductor.geojson.WorldGeometry {
+  public final double[] getPoints();
+  public final double[] component1();
+  public final com.mapconductor.geojson.WorldGeometry$Points copy(double[]);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.WorldGeometry$Polygon extends com.mapconductor.geojson.WorldGeometry {
+  public final java.util.List<com.mapconductor.geojson.WorldRing> getRings();
+  public final java.util.List<com.mapconductor.geojson.WorldRing> component1();
+  public final com.mapconductor.geojson.WorldGeometry$Polygon copy(java.util.List<com.mapconductor.geojson.WorldRing>);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+public final class com.mapconductor.geojson.WorldRing {
+  public com.mapconductor.geojson.WorldRing(double[]);
+  public final double[] getCoords();
+  public final double[] coordsForZoom(int, int, int);
+}
