@@ -72,6 +72,16 @@ dependencies {
 
 // Publishing configuration
 val libraryGroupId = project.findProperty("libraryGroupId") as String? ?: "com.mapconductor"
+// ★ **"geojson-layer" に改名しないこと。**
+// リポジトリ名（android-geojson-layer / ios-geojson-layer / react-geojson-layer）や
+// Gradle のモジュール名（:android-geojson-layer）、npm の
+// @mapconductor/react-geojson-layer とは揃っていないが、
+// **Maven Central には 1.0.0 から一貫して com.mapconductor:geojson で出ている。**
+// Central は公開済み座標を削除・改名できないため、揃えようとすると別アーティファクト
+// の新規公開になり、利用者に移行を強いることになる。不揃いのまま維持する。
+// （1.3.1 のリリース時、publish ワークフローの ARTIFACT_ID だけが "geojson-layer" に
+//   なっており、Central のメタデータ照会が常に 404 で「公開済み判定」が効いていなかった。
+//   そちらをこの値に合わせて修正済み。）
 val libraryArtifactId = "geojson"
 val libraryVersion = project.findProperty("libraryVersion") as String? ?: "1.0.0"
 val coreLibraryVersion = project.findProperty("coreLibraryVersion") as String? ?: "1.0.0"
