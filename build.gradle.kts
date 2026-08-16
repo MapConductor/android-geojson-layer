@@ -72,16 +72,26 @@ dependencies {
 
 // Publishing configuration
 val libraryGroupId = project.findProperty("libraryGroupId") as String? ?: "com.mapconductor"
-// ★ **"geojson-layer" に改名しないこと。**
-// リポジトリ名（android-geojson-layer / ios-geojson-layer / react-geojson-layer）や
-// Gradle のモジュール名（:android-geojson-layer）、npm の
-// @mapconductor/react-geojson-layer とは揃っていないが、
-// **Maven Central には 1.0.0 から一貫して com.mapconductor:geojson で出ている。**
-// Central は公開済み座標を削除・改名できないため、揃えようとすると別アーティファクト
-// の新規公開になり、利用者に移行を強いることになる。不揃いのまま維持する。
+// ★ **勝手に "geojson-layer" へ改名しないこと。ただし現状が正解とも限らない。**
+//
+// このモジュールは公開先ごとに違う名前で既に出ている:
+//   Maven Central  com.mapconductor:geojson              1.0.0 / 1.0.1 / 1.3.1
+//   npm            @mapconductor/react-geojson-layer     0.1.1 / 0.1.2 / 0.1.3
+//   リポジトリ名   android|ios|react-geojson-layer
+//
+// **どちらも公開済みで、どちらも取り消せない**（npm の unpublish は制限が厳しく、
+// Maven Central は座標を削除・改名できない）。1.3.1 では Maven 側を既存の
+// "geojson" のまま出した。1.0.0 からこの名前で、変えると別アーティファクトの
+// 新規公開になるため。
+//
+// ただし react が先行して "geojson-layer" で出ており、iOS は SPM がリポジトリ名を
+// そのまま使うので "geojson-layer" になる。**揃えるなら Maven 側を寄せるのが筋**で、
+// その場合は "geojson" を非推奨にして移行を案内する作業になる。
+// 3 プラットフォーム揃えての判断は todo/20260816.txt §9 に残してある。
+//
 // （1.3.1 のリリース時、publish ワークフローの ARTIFACT_ID だけが "geojson-layer" に
 //   なっており、Central のメタデータ照会が常に 404 で「公開済み判定」が効いていなかった。
-//   そちらをこの値に合わせて修正済み。）
+//   **元の記述が本来の意図を示していた可能性がある。**）
 val libraryArtifactId = "geojson"
 val libraryVersion = project.findProperty("libraryVersion") as String? ?: "1.0.0"
 val coreLibraryVersion = project.findProperty("coreLibraryVersion") as String? ?: "1.0.0"
