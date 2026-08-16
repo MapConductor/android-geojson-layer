@@ -1,0 +1,64 @@
+name: Build
+
+# 単体ビルドの検証。
+#
+# ## なぜ要るのか
+#
+# このモジュールは android-sdk の集約ビルドと、自分だけの単体ビルドの
+# 2 通りで組まれる。開発は集約ビルドで行うため、**単体ビルド側の設定が
+# 静かに腐る。** 実際 1.3.0 のリリースでは、publish ワークフローを回して
+# 初めて次のような不備がまとめて露見した:
+#
+#   - gradlew / settings.gradle.kts が無くて ./gradlew が叩けない
+#   - version catalog に依存の定義が無い（集約側の catalog にはある）
+#   - coroutines が推移的に古い版になり 3 引数 resume が通らない
+#   - ベンダ SDK の版が集約ビルドと食い違う
+#
+# publish のときにしか単体ビルドしないと、リリース当日に気づくことになる。
+# ここで PR ごとに回して、変更した時点で分かるようにする。
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Build core and compose locally
+        run: |
+          git clone --depth 1 https://github.com/MapConductor/android-sdk-core.git _core
+          cd _core
+          ./gradlew --no-daemon publishToMavenLocal
+          cd ..
+
+          mkdir -p "$HOME/.gradle/init.d"
+          cat > "$HOME/.gradle/init.d/use-local-maven.init.gradle" << 'EOF'
+          gradle.settingsEvaluated { settings ->
+              settings.dependencyResolutionManagement.repositories {
+                  mavenLocal()
+              }
+          }
+          EOF
+
+          git clone --depth 1 https://github.com/MapConductor/android-sdk-compose.git _compose
+          cd _compose
+          ./gradlew --no-daemon publishToMavenLocal
+          cd ..
+
+      # apiCheck は集約ビルド（android-sdk）の gradle/api-surface.gradle.kts が
+      # 提供するタスクで、単体ビルドには存在しない。ここでは組み立てだけを見る。
+      - name: Assemble
+        run: ./gradlew --no-daemon -PskipSampleApp=true assembleRelease
