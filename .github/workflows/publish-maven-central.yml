@@ -29,8 +29,13 @@ jobs:
           echo "${{ secrets.GPG_PRIVATE_KEY }}" | base64 --decode > "$HOME/secring.gpg"
           gpg --batch --import "$HOME/secring.gpg"
 
-      - name: Build core locally
+      - name: Build core and compose locally
         run: |
+          # このモジュールは単体ビルドだと com.mapconductor:compose を座標で解決する
+          # （build.gradle.kts の findProject 分岐）。compose はさらに core に依存するので、
+          # core -> mavenLocal を有効化 -> compose の順に積む。
+          # **compose を積まないと依存解決で落ちる。** Compose 層を切り出す前の
+          # ワークフローは core だけを clone していた。
           git clone --depth 1 https://github.com/MapConductor/android-sdk-core.git _core
           cd _core
           ./gradlew --no-daemon publishToMavenLocal
@@ -44,6 +49,11 @@ jobs:
               }
           }
           EOF
+
+          git clone --depth 1 https://github.com/MapConductor/android-sdk-compose.git _compose
+          cd _compose
+          ./gradlew --no-daemon publishToMavenLocal
+          cd ..
 
       - name: Check version and publish to Maven Central
         env:
