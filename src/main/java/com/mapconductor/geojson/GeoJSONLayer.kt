@@ -31,8 +31,7 @@ fun MapViewScope.GeoJSONLayer(
 ) {
     val featureCollector =
         remember {
-            OverlayCollector<GeoJSONFeatureState, GeoJSONFeatureFingerPrint>(
-                fingerPrintOf = { it.fingerPrint() },
+            OverlayCollector<GeoJSONFeatureState>(
                 updateDebounce = Settings.Default.composeEventDebounce,
             )
         }
