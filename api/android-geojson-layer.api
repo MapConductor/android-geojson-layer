@@ -67,6 +67,7 @@ public final class com.mapconductor.geojson.GeoJSONFeatureState implements com.m
   public com.mapconductor.geojson.GeoJSONFeatureState(java.lang.String, com.mapconductor.geojson.GeoJSONGeometry, java.util.Map<java.lang.String, ? extends java.lang.Object>, java.lang.Integer, java.lang.Integer, java.lang.Float, java.lang.Float, boolean);
   public com.mapconductor.geojson.GeoJSONFeatureState(java.lang.String, com.mapconductor.geojson.GeoJSONGeometry, java.util.Map, java.lang.Integer, java.lang.Integer, java.lang.Float, java.lang.Float, boolean, int, kotlin.jvm.internal.DefaultConstructorMarker);
   public java.lang.String getId();
+  public com.mapconductor.core.StateMutationSignal getMutations();
   public final com.mapconductor.geojson.GeoJSONGeometry getGeometry();
   public final void setGeometry(com.mapconductor.geojson.GeoJSONGeometry);
   public final java.util.Map<java.lang.String, java.lang.Object> getProperties();
@@ -82,7 +83,6 @@ public final class com.mapconductor.geojson.GeoJSONFeatureState implements com.m
   public final boolean getVisible();
   public final void setVisible(boolean);
   public final com.mapconductor.geojson.GeoJSONFeatureFingerPrint fingerPrint();
-  public final kotlinx.coroutines.flow.Flow<com.mapconductor.geojson.GeoJSONFeatureFingerPrint> asFlow();
 }
 public final class com.mapconductor.geojson.GeoJSONFeatureState$Companion {
 }
@@ -238,6 +238,7 @@ public final class com.mapconductor.geojson.GeoJSONTileRenderer implements com.m
   public byte[] renderTile(com.mapconductor.core.tileserver.TileRequest);
   public final com.mapconductor.geojson.GeoJSONTileRenderer$GeoJSONHitTestResult hitTest(double, double, java.lang.Double, java.lang.Double);
   public final com.mapconductor.geojson.GeoJSONFeature hitTestFeature(double, double, java.lang.Double, java.lang.Double);
+  public byte[] renderTile(com.mapconductor.core.tileserver.TileRequest, kotlin.jvm.functions.Function0<java.lang.Boolean>);
   public com.mapconductor.geojson.GeoJSONTileRenderer();
 }
 public final class com.mapconductor.geojson.GeoJSONTileRenderer$Companion {

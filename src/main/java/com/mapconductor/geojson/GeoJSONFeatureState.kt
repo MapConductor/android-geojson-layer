@@ -1,12 +1,9 @@
 package com.mapconductor.geojson
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import com.mapconductor.core.ComponentState
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
+import com.mapconductor.core.StateMutationSignal
 
 class GeoJSONFeatureState(
     featureId: String? = null,
@@ -20,13 +17,19 @@ class GeoJSONFeatureState(
 ) : ComponentState {
     override val id: String = featureId ?: buildDefaultId(geometry, properties)
 
-    var geometry by mutableStateOf(geometry)
-    var properties by mutableStateOf(properties)
-    var strokeColor by mutableStateOf(strokeColor)
-    var fillColor by mutableStateOf(fillColor)
-    var strokeWidth by mutableStateOf(strokeWidth)
-    var pointRadius by mutableStateOf(pointRadius)
-    var visible by mutableStateOf(visible)
+    /**
+     * Writes to the fields below are announced here rather than discovered by
+     * reading them all back. See [StateMutationSignal].
+     */
+    override val mutations = StateMutationSignal()
+
+    var geometry by mutations.notifying(geometry)
+    var properties by mutations.notifying(properties)
+    var strokeColor by mutations.notifying(strokeColor)
+    var fillColor by mutations.notifying(fillColor)
+    var strokeWidth by mutations.notifying(strokeWidth)
+    var pointRadius by mutations.notifying(pointRadius)
+    var visible by mutations.notifying(visible)
 
     fun fingerPrint(): GeoJSONFeatureFingerPrint =
         GeoJSONFeatureFingerPrint(
@@ -36,8 +39,6 @@ class GeoJSONFeatureState(
             style = styleHashCode(),
             visible = visible.hashCode(),
         )
-
-    fun asFlow(): Flow<GeoJSONFeatureFingerPrint> = snapshotFlow { fingerPrint() }.distinctUntilChanged()
 
     private fun styleHashCode(): Int {
         var h = strokeColor.hashCode()
